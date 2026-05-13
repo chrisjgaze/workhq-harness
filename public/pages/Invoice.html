@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WorkHQ Invoice Event Sender</title>
+    <style>
+        :root {
+            --navy: #071a63;
+            --deep-navy: #041044;
+            --blue: #2078ff;
+            --cyan: #18d7e5;
+            --aqua: #5ff0e6;
+            --white: #ffffff;
+            --muted: #b7c4e8;
+            --card: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.18);
+            --danger: #ff6b8a;
+            --success: #5ff0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
+                radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
+                linear-gradient(135deg, var(--deep-navy), var(--navy));
+            padding: 36px;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 42px;
+            letter-spacing: -1px;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 18px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .login-panel {
+            width: 360px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .login-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .login-row button {
+            margin-top: 0;
+            width: auto;
+            padding: 11px 18px;
+            border-radius: 12px;
+        }
+
+        .token-status {
+            font-size: 13px;
+            margin-top: 10px;
+            color: var(--muted);
+        }
+
+        .token-box {
+            margin-top: 10px;
+            max-height: 92px;
+            overflow: auto;
+            word-break: break-all;
+            background: rgba(1, 8, 35, 0.72);
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 11px;
+            color: #d8fff8;
+            display: none;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 24px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        thead {
+            background: rgba(24, 215, 229, 0.16);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        th {
+            color: var(--aqua);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        td {
+            color: var(--muted);
+        }
+
+        td strong {
+            color: white;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        select {
+            width: 100%;
+            background: rgba(1, 8, 35, 0.72);
+            color: white;
+            border: 1px solid rgba(95, 240, 230, 0.35);
+            border-radius: 10px;
+            padding: 8px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--cyan);
+            transform: scale(1.15);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+        }
+
+        button:hover {
+            box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        pre {
+            min-height: 220px;
+            background: rgba(1, 8, 35, 0.72);
+            color: #d8fff8;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            overflow: auto;
+            font-size: 13px;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(24, 215, 229, 0.16);
+            color: var(--aqua);
+            font-size: 13px;
+            border: 1px solid rgba(24, 215, 229, 0.35);
+            white-space: nowrap;
+        }
+
+        .ok {
+            color: var(--success);
+        }
+
+        .bad {
+            color: var(--danger);
+        }
+
+        @media (max-width: 950px) {
+            .topbar {
+                flex-direction: column;
+            }
+
+            .login-panel {
+                width: 100%;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+                    <img src="../assets/logo.png" class="brand-logo">
+                </a>
+                <div>
+                    <span>SS&C Blue Prism</span>
+                    <h1>WorkHQ Invoice Sender</h1>
+                </div>
+            </div>
+
+            <div class="login-panel">
+                <div class="login-row">
+                    <button id="loginButton" onclick="login()">Login</button>
+                    <span id="loginStatus" class="token-status">No bearer token yet.</span>
+                </div>
+                <div id="tokenBox" class="token-box"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Invoices</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /></th>
+                        <th>Invoice</th>
+                        <th>Supplier</th>
+                        <th>Country</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Event</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTable"></tbody>
+            </table>
+
+            <button onclick="sendSelectedInvoices()">Send Selected to WorkHQ</button>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Payload Sent</h2>
+                <pre id="payloadOutput">Nothing sent yet.</pre>
+            </div>
+
+            <div class="card">
+                <h2>Webhook Response</h2>
+                <pre id="responseOutput">No response yet.</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = "https://presales.nextgen.blueprism.com/regions/eu-central/api/workflows/v1/webhooks/xKEZYznqXRZZy8o3ARPkn/sync";
+
+        let bearerToken = null;
+
+        async function login() {
+            const button = document.getElementById("loginButton");
+            const status = document.getElementById("loginStatus");
+            const tokenBox = document.getElementById("tokenBox");
+
+            button.disabled = true;
+            status.textContent = "Getting token...";
+            status.className = "token-status";
+            tokenBox.style.display = "none";
+            tokenBox.textContent = "";
+
+            try {
+                const res = await fetch("http://localhost:3000/token");
+                const data = await res.json();
+                bearerToken = data.access_token;
+
+                status.textContent = "Bearer token acquired.";
+                status.className = "token-status ok";
+            } catch (err) {
+                bearerToken = null;
+
+                status.textContent = "Login failed.";
+                status.className = "token-status bad";
+
+                tokenBox.style.display = "block";
+                tokenBox.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        const invoices = [
+            { invoiceId: "INV-10045", supplierName: "Acme Trading LLC", supplierCountry: "AE", amount: 12500.75, currency: "AED", status: "Pending Review" },
+            { invoiceId: "INV-10046", supplierName: "Northstar Services", supplierCountry: "GB", amount: 8420.00, currency: "GBP", status: "Received" },
+            { invoiceId: "INV-10047", supplierName: "BluePeak Logistics", supplierCountry: "US", amount: 22350.40, currency: "USD", status: "Pending Approval" },
+            { invoiceId: "INV-10048", supplierName: "Delta Manufacturing", supplierCountry: "DE", amount: 5640.25, currency: "EUR", status: "Rejected" },
+            { invoiceId: "INV-10049", supplierName: "Gulf Trade Partners", supplierCountry: "AE", amount: 38900.90, currency: "AED", status: "Ready for Payment" }
+        ];
+
+        function renderInvoices() {
+            const table = document.getElementById("invoiceTable");
+
+            table.innerHTML = invoices.map((invoice, index) => `
+        <tr>
+          <td><input type="checkbox" class="invoice-check" value="${index}" /></td>
+          <td><strong>${invoice.invoiceId}</strong></td>
+          <td>${invoice.supplierName}</td>
+          <td>${invoice.supplierCountry}</td>
+          <td>${invoice.currency} ${invoice.amount.toLocaleString()}</td>
+          <td><span class="status-pill">${invoice.status}</span></td>
+          <td>
+            <select id="event-${index}">
+              <option value="invoice_received">Invoice Received</option>
+              <option value="invoice_approved">Invoice Approved</option>
+              <option value="invoice_rejected">Invoice Rejected</option>
+              <option value="payment_ready">Payment Ready</option>
+            </select>
+          </td>
+        </tr>
+      `).join("");
+        }
+
+        function toggleSelectAll() {
+            const checked = document.getElementById("selectAll").checked;
+            document.querySelectorAll(".invoice-check").forEach(box => {
+                box.checked = checked;
+            });
+        }
+
+        function createPayload(invoice, eventType) {
+            return {
+                eventId: "EVT-" + crypto.randomUUID(),
+                eventType,
+                receivedAt: new Date().toISOString(),
+                invoice,
+                request: {
+                    priority: eventType === "invoice_rejected" || invoice.amount > 20000 ? "high" : "medium",
+                    requiresApproval: eventType === "invoice_received" || invoice.amount > 10000,
+                    source: "mock-invoice-html"
+                }
+            };
+        }
+
+        async function sendSelectedInvoices() {
+            const selected = [...document.querySelectorAll(".invoice-check:checked")];
+
+            if (!bearerToken) {
+                document.getElementById("responseOutput").textContent =
+                    "No bearer token available. Click Login first.";
+                return;
+            }
+
+            if (selected.length === 0) {
+                document.getElementById("responseOutput").textContent =
+                    "Select at least one invoice.";
+                return;
+            }
+
+            const results = [];
+            const sentPayloads = [];
+
+            for (const checkbox of selected) {
+                const index = Number(checkbox.value);
+                const invoice = invoices[index];
+                const eventType = document.getElementById(`event-${index}`).value;
+                const payload = createPayload(invoice, eventType);
+
+                sentPayloads.push(payload);
+
+                try {
+                    const response = await fetch("http://localhost:3000/proxy", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            endpoint: WEBHOOK_URL,
+                            method: "POST",
+                            token: bearerToken,
+                            body: payload
+                        })
+                    });
+
+                    const responseText = await response.text();
+
+                    results.push({
+                        invoiceId: invoice.invoiceId,
+                        eventType,
+                        status: response.status,
+                        response: responseText
+                    });
+
+                } catch (error) {
+                    results.push({
+                        invoiceId: invoice.invoiceId,
+                        eventType,
+                        status: "ERROR",
+                        response: String(error)
+                    });
+                }
+            }
+
+            document.getElementById("payloadOutput").textContent =
+                JSON.stringify(sentPayloads, null, 2);
+
+            document.getElementById("responseOutput").textContent =
+                JSON.stringify(results, null, 2);
+        }
+
+        renderInvoices();
+    </script>
+</body>
+
+</html>

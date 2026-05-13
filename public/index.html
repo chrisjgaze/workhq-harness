@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>WorkHQ Demo Hub</title>
+
+  <style>
+    :root {
+      --navy: #071a63;
+      --deep-navy: #041044;
+      --blue: #2078ff;
+      --cyan: #18d7e5;
+      --aqua: #5ff0e6;
+      --white: #ffffff;
+      --muted: #b7c4e8;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
+        radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
+        linear-gradient(135deg, var(--deep-navy), var(--navy));
+      padding: 40px;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 42px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(24, 215, 229, 0.35);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(24, 215, 229, 0.16);
+      color: var(--aqua);
+      border: 1px solid rgba(24, 215, 229, 0.35);
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="shell">
+
+    <div class="header">
+      <a href="index.html" aria-label="Go to WorkHQ Demo Hub">
+        <img src="assets/logo.png" class="logo" />
+      </a>
+      <div>
+        <h1>WorkHQ Demo Hub</h1>
+        <div class="subtitle">Local tools & test harnesses</div>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <a href="pages/test-harness.html" class="card">
+        <h2>API Test Harness</h2>
+        <p>Send custom requests with bearer auth and inspect responses.</p>
+        <div class="badge">Developer Tool</div>
+      </a>
+
+      <a href="pages/WorkHQApi.html" class="card">
+        <h2>WorkHQ REST API Console</h2>
+        <p>Use configured service account credentials to call platform and RPA REST API endpoints.</p>
+        <div class="badge">REST API</div>
+      </a>
+
+      <a href="pages/Invoice.html" class="card">
+        <h2>Invoice Event UI</h2>
+        <p>Select invoices and trigger WorkHQ workflows via webhook.</p>
+        <div class="badge">Demo UI</div>
+      </a>
+
+      <a href="archive/Invoice-copy.html.old" class="card">
+        <h2>Legacy Invoice UI</h2>
+        <p>Older version of the invoice demo for comparison/testing.</p>
+        <div class="badge">Archive</div>
+      </a>
+      <a href="pages/Email.html" class="card">
+        <h2>Email Event UI</h2>
+        <p>Send mock emails into a demo inbox or email API to trigger WorkHQ email workflows.</p>
+        <div class="badge">Email Trigger</div>
+      </a>
+
+      <a href="pages/FileDrop.html" class="card">
+        <h2>File Drop UI</h2>
+        <p>Create mock files for OneDrive, S3, or watched-folder trigger demos.</p>
+        <div class="badge">File Trigger</div>
+      </a>
+
+      <a href="pages/KYC.html" class="card">
+        <h2>KYC Document UI</h2>
+        <p>Drag and drop KYC documents, base64 encode them, and send a webhook payload.</p>
+        <div class="badge">Webhook</div>
+      </a>
+
+      <a href="pages/Slack.html" class="card">
+        <h2>Slack Event UI</h2>
+        <p>Post mock channel messages to demonstrate chat/message-based workflow triggers.</p>
+        <div class="badge">Message Trigger</div>
+      </a>
+
+      <a href="pages/Salesforce.html" class="card">
+        <h2>Salesforce Event UI</h2>
+        <p>Create mock CRM records to trigger SaaS connector workflows.</p>
+        <div class="badge">CRM Trigger</div>
+      </a>
+
+      <a href="https://presales.nextgen.blueprism.com/workflows/chats/HjFtkFrMHnt6LCPiKl3nc" class="card"
+        target="_blank" rel="noopener noreferrer">
+        <h2>Arabic Translation Chat</h2>
+        <p>Open the WorkHQ chat experience for Arabic translation.</p>
+        <div class="badge">Chat</div>
+      </a>
+
+      <a href="https://presales.nextgen.blueprism.com/forms/run-form/8f43d25c-0861-496e-8ada-a0cc98152d2e"
+        class="card" target="_blank" rel="noopener noreferrer">
+        <h2>Form Submissions</h2>
+        <p>Open the WorkHQ form experience for submitting demo requests.</p>
+        <div class="badge">Form</div>
+      </a>
+    </div>
+
+    <footer>
+      WorkHQ Local Environment • Proxy: http://localhost:3000
+    </footer>
+
+  </div>
+
+</body>
+
+</html>

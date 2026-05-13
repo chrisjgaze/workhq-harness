@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+.env
+*.log
+config/workhq-config.json
+data/*.json
+notes/

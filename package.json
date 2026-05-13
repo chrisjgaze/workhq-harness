@@ -1,0 +1,20 @@
+{
+  "name": "demo-assets",
+  "version": "1.0.0",
+  "main": "server/proxy.js",
+  "scripts": {
+    "dev": "bash run_server.sh",
+    "proxy": "node server/proxy.js",
+    "web": "python3 -m http.server 8080 --directory public",
+    "test": "node --check server/proxy.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Local WorkHQ demo assets, API proxy, and trigger harnesses.",
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1045.0",
+    "cors": "2.8.6",
+    "express": "5.2.1"
+  }
+}

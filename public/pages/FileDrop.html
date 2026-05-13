@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WorkHQ File Drop Sender</title>
+    <style>
+        :root {
+            --navy: #071a63;
+            --deep-navy: #041044;
+            --blue: #2078ff;
+            --cyan: #18d7e5;
+            --aqua: #5ff0e6;
+            --white: #ffffff;
+            --muted: #b7c4e8;
+            --card: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.18);
+            --danger: #ff6b8a;
+            --success: #5ff0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
+                radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
+                linear-gradient(135deg, var(--deep-navy), var(--navy));
+            padding: 36px;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 42px;
+            letter-spacing: -1px;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 18px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .status-panel {
+            width: 360px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .status-panel strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .status-panel span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 24px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        thead {
+            background: rgba(24, 215, 229, 0.16);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        th {
+            color: var(--aqua);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        td {
+            color: var(--muted);
+        }
+
+        td strong {
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+        }
+
+        button:hover {
+            box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        pre {
+            min-height: 220px;
+            background: rgba(1, 8, 35, 0.72);
+            color: #d8fff8;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            overflow: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(24, 215, 229, 0.16);
+            color: var(--aqua);
+            font-size: 13px;
+            border: 1px solid rgba(24, 215, 229, 0.35);
+            white-space: nowrap;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar h2 {
+            margin: 0;
+        }
+
+        .toolbar button {
+            width: auto;
+            margin-top: 0;
+            padding: 11px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            color: var(--muted);
+            padding: 18px 0 0;
+        }
+
+        @media (max-width: 950px) {
+            .topbar {
+                flex-direction: column;
+            }
+
+            .status-panel {
+                width: 100%;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+                    <img src="../assets/logo.png" class="brand-logo">
+                </a>
+                <div>
+                    <span>SS&C Blue Prism</span>
+                    <h1>WorkHQ File Drop Sender</h1>
+                </div>
+            </div>
+
+            <div class="status-panel">
+                <strong>S3 File Trigger</strong>
+                <span>Proxy: http://localhost:3000/drop-file</span>
+                <span>List: http://localhost:3000/list-files</span>
+                <span>Prefix: workhq-demo/</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Sample File</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Folder</th>
+                        <th>Content Type</th>
+                        <th>Scenario</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>INV-10045.json</strong></td>
+                        <td>/workhq-demo/invoices</td>
+                        <td>application/json</td>
+                        <td>Invoice ingestion</td>
+                        <td><span class="status-pill">Ready to Drop</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <button id="dropButton" onclick="dropFile()">Drop Sample Invoice File</button>
+        </div>
+
+        <div class="card" style="margin-top: 22px;">
+            <div class="toolbar">
+                <h2>Files in S3</h2>
+                <button id="refreshButton" onclick="loadFiles()">Refresh Files</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Size</th>
+                        <th>Last Modified</th>
+                        <th>Key</th>
+                    </tr>
+                </thead>
+                <tbody id="filesTable"></tbody>
+            </table>
+            <div id="filesEmpty" class="empty-state">No files loaded yet.</div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Payload Sent</h2>
+                <pre id="payloadOutput">Nothing sent yet.</pre>
+            </div>
+
+            <div class="card">
+                <h2>S3 Response</h2>
+                <pre id="responseOutput">No response yet.</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createPayload() {
+            return {
+                eventId: "EVT-" + crypto.randomUUID(),
+                eventType: "file_created",
+                receivedAt: new Date().toISOString(),
+                source: "mock-filedrop-html",
+                businessObject: {
+                    fileName: "INV-10045.json",
+                    folder: "/workhq-demo/invoices",
+                    contentType: "application/json",
+                    content: {
+                        invoiceId: "INV-10045",
+                        supplierName: "Acme Trading LLC",
+                        amount: 12500.75,
+                        currency: "AED"
+                    }
+                },
+                request: {
+                    priority: "medium",
+                    requiresApproval: true,
+                    source: "mock-filedrop-html"
+                }
+            };
+        }
+
+        async function dropFile() {
+            const button = document.getElementById("dropButton");
+            const payloadOutput = document.getElementById("payloadOutput");
+            const responseOutput = document.getElementById("responseOutput");
+            const payload = createPayload();
+
+            button.disabled = true;
+            payloadOutput.textContent = JSON.stringify(payload, null, 2);
+            responseOutput.textContent = "Dropping file...";
+
+            try {
+                const res = await fetch("http://localhost:3000/drop-file", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fileName: payload.businessObject.fileName,
+                        contentType: "application/json",
+                        content: JSON.stringify(payload, null, 2)
+                    })
+                });
+
+                const responseText = await res.text();
+
+                responseOutput.textContent = JSON.stringify({
+                    status: res.status,
+                    response: responseText
+                }, null, 2);
+
+                if (res.ok) {
+                    await loadFiles();
+                }
+            } catch (err) {
+                responseOutput.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes) {
+                return "0 B";
+            }
+
+            if (bytes < 1024) {
+                return `${bytes} B`;
+            }
+
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(1)} KB`;
+            }
+
+            return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+        }
+
+        async function loadFiles() {
+            const button = document.getElementById("refreshButton");
+            const filesTable = document.getElementById("filesTable");
+            const filesEmpty = document.getElementById("filesEmpty");
+
+            button.disabled = true;
+            filesEmpty.textContent = "Loading files...";
+
+            try {
+                const res = await fetch("http://localhost:3000/list-files");
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.error || `HTTP ${res.status}`);
+                }
+
+                filesTable.innerHTML = data.files.map(file => `
+                    <tr>
+                        <td><strong>${file.fileName}</strong></td>
+                        <td>${formatBytes(file.size)}</td>
+                        <td>${new Date(file.lastModified).toLocaleString()}</td>
+                        <td>${file.key}</td>
+                    </tr>
+                `).join("");
+
+                filesEmpty.textContent = data.files.length ? "" : "No files found in this S3 prefix.";
+            } catch (err) {
+                filesTable.innerHTML = "";
+                filesEmpty.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        loadFiles();
+    </script>
+</body>
+
+</html>

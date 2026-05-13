@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WorkHQ REST API Console</title>
+    <style>
+        :root {
+            --navy: #071a63;
+            --deep-navy: #041044;
+            --blue: #2078ff;
+            --cyan: #18d7e5;
+            --aqua: #5ff0e6;
+            --white: #ffffff;
+            --muted: #b7c4e8;
+            --card: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.18);
+            --danger: #ff6b8a;
+            --success: #5ff0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
+                radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
+                linear-gradient(135deg, var(--deep-navy), var(--navy));
+            padding: 36px;
+        }
+
+        .shell {
+            max-width: 1280px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 42px;
+            letter-spacing: -1px;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 18px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .config-panel,
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .config-panel {
+            width: 390px;
+        }
+
+        .config-row {
+            display: grid;
+            grid-template-columns: auto minmax(190px, 1fr) auto;
+            align-items: center;
+            gap: 10px;
+            margin: 7px 0;
+            font-size: 13px;
+        }
+
+        .config-row strong {
+            color: var(--aqua);
+            font-weight: 700;
+        }
+
+        .config-row span {
+            color: var(--muted);
+            overflow-wrap: anywhere;
+        }
+
+        .config-row select {
+            padding: 9px;
+            border-radius: 10px;
+            font-size: 13px;
+            text-transform: none;
+        }
+
+        .config-row button {
+            width: auto;
+            margin-top: 0;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .sync-time {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 320px minmax(360px, 1fr) minmax(420px, 1.15fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .workspace-card {
+            height: min(720px, calc(100vh - 170px));
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .result-card {
+            position: sticky;
+            top: 18px;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 22px;
+        }
+
+        h3 {
+            margin: 20px 0 10px;
+            color: var(--aqua);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        label {
+            display: block;
+            color: var(--aqua);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin: 14px 0 8px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(1, 8, 35, 0.72);
+            color: white;
+            border: 1px solid rgba(95, 240, 230, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 190px;
+            font-family: Consolas, Monaco, monospace;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+        }
+
+        button:hover {
+            box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .preset {
+            width: 100%;
+            margin: 8px 0 0;
+            padding: 11px 12px;
+            border: 1px solid rgba(95, 240, 230, 0.24);
+            border-radius: 12px;
+            background: rgba(1, 8, 35, 0.44);
+            color: var(--white);
+            text-align: left;
+            box-shadow: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .preset small {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-weight: 400;
+            overflow-wrap: anywhere;
+        }
+
+        details {
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 10px 0;
+        }
+
+        details:first-of-type {
+            border-top: 0;
+        }
+
+        summary {
+            color: var(--aqua);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .method-path {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 14px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        pre {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            background: rgba(1, 8, 35, 0.72);
+            color: #d8fff8;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            overflow: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-button {
+            width: auto;
+            margin: 0;
+            padding: 9px 13px;
+            border-radius: 12px;
+            background: rgba(1, 8, 35, 0.44);
+            border: 1px solid rgba(95, 240, 230, 0.24);
+            box-shadow: none;
+            font-size: 13px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            border-color: transparent;
+        }
+
+        .tab-panel {
+            display: none;
+            min-height: 0;
+        }
+
+        .tab-panel.active {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+        }
+
+        .tabs {
+            flex: 0 0 auto;
+        }
+
+        .output-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .output-toolbar .tabs {
+            margin-bottom: 0;
+        }
+
+        .pretty-button {
+            width: auto;
+            margin: 0;
+            padding: 9px 13px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(1, 8, 35, 0.72);
+            padding: 28px;
+            z-index: 20;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal {
+            width: min(1120px, 96vw);
+            max-height: 88vh;
+            background: rgba(5, 18, 68, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+            padding: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .modal-close {
+            width: auto;
+            margin: 0;
+            padding: 9px 13px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .pretty-content {
+            min-height: 0;
+            overflow: auto;
+        }
+
+        .pretty-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .pretty-table th,
+        .pretty-table td {
+            text-align: left;
+            vertical-align: top;
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 13px;
+        }
+
+        .pretty-table th {
+            position: sticky;
+            top: 0;
+            background: rgba(24, 215, 229, 0.18);
+            color: var(--aqua);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pretty-filter-row th {
+            top: 38px;
+            background: rgba(5, 18, 68, 0.98);
+        }
+
+        .pretty-filter {
+            width: 100%;
+            min-width: 120px;
+            padding: 7px 8px;
+            border-radius: 9px;
+            font-size: 12px;
+            text-transform: none;
+        }
+
+        .pretty-table td {
+            color: var(--muted);
+            overflow-wrap: anywhere;
+        }
+
+        .ok {
+            color: var(--success);
+        }
+
+        .bad {
+            color: var(--danger);
+        }
+
+        @media (max-width: 980px) {
+            .topbar,
+            .grid {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .result-card {
+                position: static;
+            }
+
+            .workspace-card {
+                height: auto;
+                min-height: 0;
+            }
+
+            .config-panel {
+                width: 100%;
+            }
+
+            .brand h1 {
+                font-size: 32px;
+            }
+
+            .method-path {
+                grid-template-columns: 1fr;
+            }
+
+            pre {
+                height: 360px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+                    <img src="../assets/logo.png" class="brand-logo">
+                </a>
+                <div>
+                    <span>SS&C Blue Prism</span>
+                    <h1>WorkHQ REST API Console</h1>
+                </div>
+            </div>
+
+            <div class="config-panel">
+                <div class="config-row">
+                    <strong>Environment</strong>
+                    <select id="environmentSelect" onchange="setDefaultEnvironment()">
+                        <option value="">No environments loaded</option>
+                    </select>
+                    <button id="syncEnvButton" onclick="syncEnvironments()">Sync</button>
+                </div>
+                <div class="sync-time">Last sync: <span id="cfgEnvSynced">Never</span></div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card workspace-card">
+                <h2>Endpoint Presets</h2>
+                <div class="card-scroll">
+                    <p class="hint">Presets fill the request form. Values like environment ID and object IDs can be edited before sending.</p>
+                    <div id="presetList"></div>
+                </div>
+            </div>
+
+            <div class="card workspace-card">
+                <h2>Request</h2>
+                <div class="card-scroll">
+                    <label for="base">API Base</label>
+                    <select id="base">
+                        <option value="managementPlatform">Management Platform - /api/platform/rest/v1</option>
+                        <option value="managementRpa">Management RPA - /api/rpa/rest/v1</option>
+                        <option value="operatingPlatform">Operating Platform - /regions/{region}/api/platform/rest/v1</option>
+                        <option value="operatingRpa" selected>Operating RPA - /regions/{region}/api/rpa/rest/v1</option>
+                    </select>
+
+                    <div class="method-path">
+                        <div>
+                            <label for="method">Method</label>
+                            <select id="method">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PATCH">PATCH</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="path">Path</label>
+                            <input id="path" value="/digital-workers" />
+                        </div>
+                    </div>
+
+                    <label for="query">Query String</label>
+                    <input id="query" placeholder="environmentId.eq=...&pageSize=25" />
+
+                    <label for="body">JSON Body</label>
+                    <textarea id="body">{}</textarea>
+
+                    <button id="sendButton" onclick="sendRequest()">Send API Request</button>
+                </div>
+            </div>
+
+            <div class="card workspace-card result-card">
+                <h2>Output</h2>
+                <div class="output-toolbar">
+                    <div class="tabs">
+                        <button id="responseTab" class="tab-button active" onclick="showTab('response')">Response</button>
+                        <button id="requestTab" class="tab-button" onclick="showTab('request')">Request</button>
+                    </div>
+                    <button class="pretty-button" onclick="openPrettyPrint()">Pretty Print</button>
+                </div>
+                <div id="responsePanel" class="tab-panel active">
+                    <pre id="responseOutput">No response yet.</pre>
+                </div>
+                <div id="requestPanel" class="tab-panel">
+                    <pre id="requestOutput">No request sent yet.</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="prettyModal" class="modal-backdrop" onclick="closePrettyPrint(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Pretty Print</h2>
+                <button class="modal-close" onclick="closePrettyPrint()">Close</button>
+            </div>
+            <div id="prettyContent" class="pretty-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let appConfig = null;
+        let selectedEnvironmentId = "";
+
+        const presets = [
+            {
+                group: "Platform - Management",
+                label: "List Environments",
+                method: "GET",
+                base: "managementPlatform",
+                path: "/environments",
+                query: "",
+                body: {}
+            },
+            {
+                group: "Platform - Management",
+                label: "List Users",
+                method: "GET",
+                base: "managementPlatform",
+                path: "/users",
+                query: "",
+                body: {}
+            },
+            {
+                group: "Platform - Management",
+                label: "List Service Accounts",
+                method: "GET",
+                base: "managementPlatform",
+                path: "/service-accounts",
+                query: "",
+                body: {}
+            },
+            {
+                group: "Platform - Management",
+                label: "Account Audit Logs",
+                method: "GET",
+                base: "managementPlatform",
+                path: "/audit-log-entries",
+                query: "eventDate.gte={auditStart}&eventDate.lte={auditEnd}&sort=eventDatedescending",
+                body: {}
+            },
+            {
+                group: "RPA - Management",
+                label: "List Automation Assets",
+                method: "GET",
+                base: "managementRpa",
+                path: "/automation-assets",
+                query: "",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "List Digital Workers",
+                method: "GET",
+                base: "operatingRpa",
+                path: "/digital-workers",
+                query: "",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "List Work Queues",
+                method: "GET",
+                base: "operatingRpa",
+                path: "/work-queues",
+                query: "",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "List Automation Flows",
+                method: "GET",
+                base: "operatingRpa",
+                path: "/automation-flows",
+                query: "environmentId.eq={environmentId}",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "List Sessions",
+                method: "GET",
+                base: "operatingRpa",
+                path: "/sessions",
+                query: "environmentId.eq={environmentId}",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "Start Automation Flow",
+                method: "POST",
+                base: "operatingRpa",
+                path: "/automation-flows/{automationFlowId}/executions",
+                query: "",
+                body: {}
+            },
+            {
+                group: "RPA - Operating",
+                label: "Create Queued Session",
+                method: "POST",
+                base: "operatingRpa",
+                path: "/sessions",
+                query: "",
+                body: {
+                    environmentId: "{environmentId}",
+                    processId: "{processId}",
+                    digitalWorkerId: "{digitalWorkerId}",
+                    digitalWorkerGroupId: "",
+                    parameters: []
+                }
+            },
+            {
+                group: "RPA - Operating",
+                label: "Add Work Queue Item",
+                method: "POST",
+                base: "operatingRpa",
+                path: "/work-queues/{workQueueId}/items",
+                query: "",
+                body: {
+                    keyValue: "Key0001",
+                    priority: 100,
+                    deferredUntil: null,
+                    status: "Added by WorkHQ API Console",
+                    tags: ["demo"],
+                    data: ""
+                }
+            }
+        ];
+
+        function withConfigValues(value) {
+            if (!appConfig) {
+                return value;
+            }
+
+            const auditEnd = new Date();
+            const auditStart = new Date(auditEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            return value
+                .replaceAll("{environmentId}", selectedEnvironmentId || appConfig.environmentId || "{environmentId}")
+                .replaceAll("{auditStart}", encodeURIComponent(auditStart.toISOString()))
+                .replaceAll("{auditEnd}", encodeURIComponent(auditEnd.toISOString()));
+        }
+
+        function renderPresets() {
+            const list = document.getElementById("presetList");
+            const groups = [...new Set(presets.map(preset => preset.group))];
+
+            list.innerHTML = groups.map(group => `
+                <details ${group === "RPA - Operating" ? "open" : ""}>
+                    <summary>${group}</summary>
+                ${presets
+                    .filter(preset => preset.group === group)
+                    .map((preset, index) => {
+                        const presetIndex = presets.indexOf(preset);
+                        return `<button class="preset" onclick="applyPreset(${presetIndex})">
+                            ${preset.label}
+                            <small>${preset.method} ${preset.path}</small>
+                        </button>`;
+                    }).join("")}
+                </details>
+            `).join("");
+        }
+
+        function showTab(tab) {
+            document.getElementById("responseTab").classList.toggle("active", tab === "response");
+            document.getElementById("requestTab").classList.toggle("active", tab === "request");
+            document.getElementById("responsePanel").classList.toggle("active", tab === "response");
+            document.getElementById("requestPanel").classList.toggle("active", tab === "request");
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function formatCell(value) {
+            if (value === null || value === undefined) {
+                return "";
+            }
+
+            if (typeof value === "object") {
+                return escapeHtml(JSON.stringify(value));
+            }
+
+            return escapeHtml(value);
+        }
+
+        function collectArraysForTable(value, arrays = []) {
+            if (Array.isArray(value)) {
+                arrays.push(value);
+                value.forEach(item => collectArraysForTable(item, arrays));
+                return arrays;
+            }
+
+            if (value && typeof value === "object") {
+                Object.values(value).forEach(item => collectArraysForTable(item, arrays));
+            }
+
+            return arrays;
+        }
+
+        function getPrettyData(value) {
+            const arrays = collectArraysForTable(value)
+                .filter(items => items.length && items.every(item => item && typeof item === "object" && !Array.isArray(item)));
+
+            if (arrays.length) {
+                arrays.sort((a, b) => b.length - a.length);
+                return arrays[0];
+            }
+
+            if (value && typeof value === "object" && !Array.isArray(value)) {
+                return Object.entries(value).map(([key, item]) => ({
+                    key,
+                    value: item
+                }));
+            }
+
+            return [{
+                value
+            }];
+        }
+
+        function flattenPrettyRow(row) {
+            const source = row && typeof row === "object" ? row : { value: row };
+            const flat = {};
+
+            Object.entries(source).forEach(([key, value]) => {
+                if (key.toLowerCase() === "etag") {
+                    return;
+                }
+
+                if (key === "entity" && value && typeof value === "object" && !Array.isArray(value)) {
+                    Object.entries(value).forEach(([entityKey, entityValue]) => {
+                        if (entityKey.toLowerCase() !== "etag") {
+                            flat[entityKey] = entityValue;
+                        }
+                    });
+                    return;
+                }
+
+                flat[key] = value;
+            });
+
+            return flat;
+        }
+
+        function renderPrettyTable(rows) {
+            const flatRows = rows.map(flattenPrettyRow);
+            const columns = [...new Set(flatRows.flatMap(row => Object.keys(row)))].slice(0, 16);
+
+            return `
+                <table class="pretty-table">
+                    <thead>
+                        <tr>${columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}</tr>
+                        <tr class="pretty-filter-row">
+                            ${columns.map((column, index) => `
+                                <th>
+                                    <input class="pretty-filter" data-column-index="${index}" placeholder="Search" oninput="filterPrettyTable()" />
+                                </th>
+                            `).join("")}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${flatRows.map(row => `
+                            <tr>${columns.map(column => `<td>${formatCell(row[column])}</td>`).join("")}</tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function filterPrettyTable() {
+            const filters = [...document.querySelectorAll(".pretty-filter")].map(input => input.value.trim().toLowerCase());
+            const rows = document.querySelectorAll(".pretty-table tbody tr");
+
+            rows.forEach(row => {
+                const cells = [...row.querySelectorAll("td")];
+                const visible = filters.every((filter, index) => {
+                    if (!filter) {
+                        return true;
+                    }
+
+                    return (cells[index]?.textContent || "").toLowerCase().includes(filter);
+                });
+
+                row.style.display = visible ? "" : "none";
+            });
+        }
+
+        function openPrettyPrint() {
+            const content = document.getElementById("prettyContent");
+            const responseText = document.getElementById("responseOutput").textContent.trim();
+
+            try {
+                const parsed = JSON.parse(responseText);
+                const rows = getPrettyData(parsed.body ?? parsed);
+                content.innerHTML = rows.length
+                    ? renderPrettyTable(rows)
+                    : `<p class="hint">No table-friendly data found.</p>`;
+            } catch (err) {
+                content.innerHTML = `<p class="hint">The current response is not valid JSON.</p>`;
+            }
+
+            document.getElementById("prettyModal").classList.add("open");
+        }
+
+        function closePrettyPrint(event) {
+            if (event && event.target.id !== "prettyModal") {
+                return;
+            }
+
+            document.getElementById("prettyModal").classList.remove("open");
+        }
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") {
+                document.getElementById("prettyModal").classList.remove("open");
+            }
+        });
+
+        function applyPreset(index) {
+            const preset = presets[index];
+            document.getElementById("base").value = preset.base;
+            document.getElementById("method").value = preset.method;
+            document.getElementById("path").value = withConfigValues(preset.path);
+            document.getElementById("query").value = withConfigValues(preset.query);
+            document.getElementById("body").value = JSON.stringify(
+                JSON.parse(withConfigValues(JSON.stringify(preset.body))),
+                null,
+                2
+            );
+        }
+
+        async function loadConfig() {
+            const res = await fetch("http://localhost:3000/workhq-config");
+            const data = await res.json();
+
+            appConfig = data;
+            selectedEnvironmentId = data.environmentId || "";
+            document.getElementById("cfgEnvSynced").textContent = data.environmentsSyncedAt
+                ? new Date(data.environmentsSyncedAt).toLocaleString()
+                : "Never";
+
+            renderEnvironmentSelect(data.environments || [], selectedEnvironmentId);
+            renderPresets();
+        }
+
+        function renderEnvironmentSelect(environments, defaultEnvironmentId) {
+            const select = document.getElementById("environmentSelect");
+
+            if (!environments.length) {
+                select.innerHTML = `<option value="${defaultEnvironmentId || ""}">${defaultEnvironmentId || "No environments loaded"}</option>`;
+                select.value = defaultEnvironmentId || "";
+                return;
+            }
+
+            select.innerHTML = environments.map(environment => `
+                <option value="${environment.id}">${environment.name} (${environment.id})</option>
+            `).join("");
+            select.value = defaultEnvironmentId || environments[0].id;
+            selectedEnvironmentId = select.value;
+        }
+
+        async function syncEnvironments() {
+            const button = document.getElementById("syncEnvButton");
+            const responseOutput = document.getElementById("responseOutput");
+
+            button.disabled = true;
+            responseOutput.textContent = "Syncing environments...";
+
+            try {
+                const res = await fetch("http://localhost:3000/workhq-environments/sync", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.error || JSON.stringify(data, null, 2));
+                }
+
+                appConfig.environments = data.environments;
+                appConfig.environmentId = data.defaultEnvironmentId;
+                selectedEnvironmentId = data.defaultEnvironmentId;
+                renderEnvironmentSelect(data.environments, data.defaultEnvironmentId);
+                document.getElementById("cfgEnvSynced").textContent = data.syncedAt
+                    ? new Date(data.syncedAt).toLocaleString()
+                    : "Never";
+                responseOutput.textContent = data.environments.length
+                    ? JSON.stringify(data, null, 2)
+                    : JSON.stringify({
+                        ...data,
+                        warning: "The environments API returned zero environments. Check that the service account has access to at least one environment."
+                    }, null, 2);
+            } catch (err) {
+                responseOutput.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function setDefaultEnvironment() {
+            const select = document.getElementById("environmentSelect");
+            const responseOutput = document.getElementById("responseOutput");
+            selectedEnvironmentId = select.value;
+
+            if (!selectedEnvironmentId || !appConfig?.environments?.length) {
+                return;
+            }
+
+            try {
+                const res = await fetch("http://localhost:3000/workhq-environments/default", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        environmentId: selectedEnvironmentId
+                    })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.ok) {
+                    throw new Error(data.error || JSON.stringify(data, null, 2));
+                }
+
+                appConfig.environmentId = selectedEnvironmentId;
+                responseOutput.textContent = JSON.stringify({
+                    ok: true,
+                    defaultEnvironmentId: selectedEnvironmentId
+                }, null, 2);
+            } catch (err) {
+                responseOutput.textContent = String(err);
+            }
+        }
+
+        async function sendRequest() {
+            const button = document.getElementById("sendButton");
+            const requestOutput = document.getElementById("requestOutput");
+            const responseOutput = document.getElementById("responseOutput");
+            const method = document.getElementById("method").value;
+            const bodyText = document.getElementById("body").value.trim();
+            let body = {};
+
+            if (bodyText && !["GET", "DELETE"].includes(method)) {
+                try {
+                    body = JSON.parse(withConfigValues(bodyText));
+                } catch (err) {
+                    responseOutput.textContent = `Invalid JSON body: ${err}`;
+                    return;
+                }
+            }
+
+            const request = {
+                base: document.getElementById("base").value,
+                method,
+                path: withConfigValues(document.getElementById("path").value.trim()),
+                query: withConfigValues(document.getElementById("query").value.trim()),
+                body
+            };
+
+            button.disabled = true;
+            showTab("response");
+            requestOutput.textContent = JSON.stringify(request, null, 2);
+            responseOutput.textContent = "Sending request...";
+
+            try {
+                const res = await fetch("http://localhost:3000/workhq-api", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(request)
+                });
+
+                const data = await res.json();
+                requestOutput.textContent = JSON.stringify(data.request || request, null, 2);
+                responseOutput.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                responseOutput.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        renderPresets();
+        loadConfig().catch(err => {
+            document.getElementById("responseOutput").textContent = String(err);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+{
+  "method": "POST",
+  "headers": {
+    "host": "example.nextgen.blueprism.com",
+    "content-type": "application/json",
+    "origin": "http://localhost:8080",
+    "authorization": "Bearer redacted"
+  },
+  "body": {
+    "eventId": "EVT-10001",
+    "eventType": "invoice_received",
+    "receivedAt": "2026-04-28T12:00:00.000Z",
+    "invoice": {
+      "invoiceId": "INV-10045",
+      "supplierName": "Acme Trading LLC",
+      "supplierCountry": "AE",
+      "amount": 12500.75,
+      "currency": "AED",
+      "status": "Pending Review"
+    },
+    "request": {
+      "priority": "medium",
+      "requiresApproval": true,
+      "source": "workhq-test-harness"
+    }
+  },
+  "queryParams": {}
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>WorkHQ Salesforce Event Sender</title></head>
+<body style="font-family:Segoe UI,Arial;background:#071a63;color:white;padding:36px">
+  <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
+    <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+      <img src="../assets/logo.png" alt="" style="width:70px;height:70px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(24,215,229,.6))">
+    </a>
+    <h1 style="margin:0">WorkHQ Salesforce Event Sender</h1>
+  </div>
+  <p>Create a mock Salesforce Case/Lead for SaaS connector demos.</p>
+  <button onclick="createRecord()" style="padding:14px 20px;border-radius:12px;border:0;background:#18d7e5;font-weight:700">Create Mock Case</button>
+  <pre id="out" style="margin-top:20px;background:#010823;padding:16px;border-radius:12px;white-space:pre-wrap"></pre>
+<script>
+async function createRecord(){
+ const payload={eventId:'EVT-'+crypto.randomUUID(),eventType:'salesforce_case_created',receivedAt:new Date().toISOString(),source:'mock-salesforce-html',businessObject:{objectType:'Case',fields:{Subject:'Invoice dispute INV-10045',Status:'New',Priority:'High',Origin:'Web',Description:'Customer disputes invoice amount and requests review.'}},request:{priority:'high',requiresApproval:true,source:'mock-salesforce-html'}};
+ const res=await fetch('http://localhost:3000/create-salesforce-record',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload.businessObject)});
+ out.textContent=JSON.stringify({payload,status:res.status,response:await res.text()},null,2);
+}
+</script>
+</body></html>

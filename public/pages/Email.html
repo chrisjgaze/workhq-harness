@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WorkHQ Email Event Sender</title>
+  <style>
+    :root { --navy:#071a63; --deep-navy:#041044; --blue:#2078ff; --cyan:#18d7e5; --aqua:#5ff0e6; --white:#fff; --muted:#b7c4e8; --card:rgba(255,255,255,.08); --border:rgba(255,255,255,.18); --danger:#ff6b8a; --success:#5ff0a0; }
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--white);background:radial-gradient(circle at 12% 12%,rgba(24,215,229,.35),transparent 28%),radial-gradient(circle at 82% 20%,rgba(32,120,255,.35),transparent 30%),linear-gradient(135deg,var(--deep-navy),var(--navy));padding:36px}.shell{max-width:1200px;margin:auto}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:18px}.brand-logo{width:70px;height:70px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(24,215,229,.6))}.brand h1{margin:0;font-size:42px;letter-spacing:-1px}.brand span{display:block;font-size:18px;color:var(--muted);margin-bottom:2px}.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:24px;backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(0,0,0,.28)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}table{width:100%;border-collapse:collapse;border-radius:16px;overflow:hidden}thead{background:rgba(24,215,229,.16)}th,td{text-align:left;padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.12)}th{color:var(--aqua);font-size:13px;text-transform:uppercase;letter-spacing:.04em}td{color:var(--muted)}td strong{color:white}select,input{width:100%;background:rgba(1,8,35,.72);color:white;border:1px solid rgba(95,240,230,.35);border-radius:10px;padding:8px}input[type="checkbox"]{width:auto;accent-color:var(--cyan);transform:scale(1.15)}button{width:100%;margin-top:18px;padding:15px 18px;border:none;border-radius:16px;color:white;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--cyan),var(--blue));box-shadow:0 0 26px rgba(24,215,229,.35)}pre{min-height:220px;background:rgba(1,8,35,.72);color:#d8fff8;padding:16px;border-radius:16px;border:1px solid rgba(95,240,230,.25);overflow:auto;font-size:13px}.status-pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(24,215,229,.16);color:var(--aqua);font-size:13px;border:1px solid rgba(24,215,229,.35)}@media(max-width:950px){.topbar{flex-direction:column}.grid{grid-template-columns:1fr}.brand h1{font-size:32px}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar"><div class="brand"><a href="../index.html" aria-label="Go to WorkHQ Demo Hub"><img src="../assets/logo.png" class="brand-logo"></a><div><span>SS&C Blue Prism</span><h1>WorkHQ Email Sender</h1></div></div></div>
+  <div class="card">
+    <h2>Mock Emails</h2>
+    <table><thead><tr><th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th><th>Email</th><th>From</th><th>Subject</th><th>Event</th></tr></thead><tbody id="emailTable"></tbody></table>
+    <button onclick="sendSelectedEmails()">Send Selected Email Events</button>
+  </div>
+  <div class="grid"><div class="card"><h2>Payload Sent</h2><pre id="payloadOutput">Nothing sent yet.</pre></div><div class="card"><h2>Response</h2><pre id="responseOutput">No response yet.</pre></div></div>
+</div>
+<script>
+const emails=[
+ {id:'EMAIL-2001',from:'supplier@acme.example',subject:'Invoice INV-10045 attached',body:'Please process the attached invoice.',attachmentName:'INV-10045.pdf'},
+ {id:'EMAIL-2002',from:'customer@northstar.example',subject:'Urgent payment query',body:'Can you confirm payment status?',attachmentName:null},
+ {id:'EMAIL-2003',from:'claims@gulf.example',subject:'New claim documents',body:'Attached are the claim documents.',attachmentName:'claim-pack.zip'}
+];
+function render(){emailTable.innerHTML=emails.map((e,i)=>`<tr><td><input type="checkbox" class="item-check" value="${i}"></td><td><strong>${e.id}</strong></td><td>${e.from}</td><td>${e.subject}</td><td><select id="event-${i}"><option value="email_received">Email Received</option><option value="invoice_email_received">Invoice Email Received</option><option value="claim_email_received">Claim Email Received</option><option value="urgent_query_received">Urgent Query Received</option></select></td></tr>`).join('')}
+function toggleSelectAll(){document.querySelectorAll('.item-check').forEach(x=>x.checked=selectAll.checked)}
+function createPayload(email,eventType){return{eventId:'EVT-'+crypto.randomUUID(),eventType,receivedAt:new Date().toISOString(),source:'mock-email-html',businessObject:{email},request:{priority:eventType.includes('urgent')?'high':'medium',requiresApproval:eventType.includes('invoice')||eventType.includes('claim'),source:'mock-email-html'}}}
+async function sendSelectedEmails(){const selected=[...document.querySelectorAll('.item-check:checked')];if(!selected.length){responseOutput.textContent='Select at least one email.';return}const payloads=[],results=[];for(const cb of selected){const i=Number(cb.value), payload=createPayload(emails[i],document.getElementById(`event-${i}`).value);payloads.push(payload);try{const res=await fetch('http://localhost:3000/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:'workhq-demo-inbox@example.com',subject:payload.businessObject.email.subject,body:JSON.stringify(payload,null,2),attachmentName:payload.businessObject.email.attachmentName})});results.push({id:emails[i].id,status:res.status,response:await res.text()})}catch(err){results.push({id:emails[i].id,status:'ERROR',response:String(err)})}}payloadOutput.textContent=JSON.stringify(payloads,null,2);responseOutput.textContent=JSON.stringify(results,null,2)}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WorkHQ KYC Document Sender</title>
+    <style>
+        :root {
+            --navy: #071a63;
+            --deep-navy: #041044;
+            --blue: #2078ff;
+            --cyan: #18d7e5;
+            --aqua: #5ff0e6;
+            --white: #ffffff;
+            --muted: #b7c4e8;
+            --card: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.18);
+            --danger: #ff6b8a;
+            --success: #5ff0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
+                radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
+                linear-gradient(135deg, var(--deep-navy), var(--navy));
+            padding: 36px;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 42px;
+            letter-spacing: -1px;
+        }
+
+        .brand span {
+            display: block;
+            font-size: 18px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .login-panel {
+            width: 360px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .login-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .login-row button {
+            margin-top: 0;
+            width: auto;
+            padding: 11px 18px;
+            border-radius: 12px;
+        }
+
+        .token-status {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .token-box {
+            margin-top: 10px;
+            max-height: 92px;
+            overflow: auto;
+            word-break: break-all;
+            background: rgba(1, 8, 35, 0.72);
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 11px;
+            color: #d8fff8;
+            display: none;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 24px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            min-width: 0;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 22px;
+            margin-top: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--aqua);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: rgba(1, 8, 35, 0.72);
+            color: white;
+            border: 1px solid rgba(95, 240, 230, 0.35);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .drop-zone {
+            min-height: 180px;
+            border: 1px dashed rgba(95, 240, 230, 0.55);
+            border-radius: 18px;
+            background: rgba(1, 8, 35, 0.38);
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--cyan);
+            background: rgba(24, 215, 229, 0.12);
+            box-shadow: 0 0 28px rgba(24, 215, 229, 0.24);
+        }
+
+        .drop-zone strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .drop-zone span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .file-summary {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(24, 215, 229, 0.12);
+            color: #d8fff8;
+            font-size: 13px;
+            word-break: break-word;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+        }
+
+        button:hover {
+            box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        pre {
+            min-height: 260px;
+            max-width: 100%;
+            background: rgba(1, 8, 35, 0.72);
+            color: #d8fff8;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(95, 240, 230, 0.25);
+            overflow: auto;
+            font-size: 13px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .ok {
+            color: var(--success);
+        }
+
+        .bad {
+            color: var(--danger);
+        }
+
+        @media (max-width: 950px) {
+            .topbar,
+            .form-grid {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .login-panel {
+                width: 100%;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+                    <img src="../assets/logo.png" class="brand-logo">
+                </a>
+                <div>
+                    <span>SS&C Blue Prism</span>
+                    <h1>KYC Document Sender</h1>
+                </div>
+            </div>
+
+            <div class="login-panel">
+                <div class="login-row">
+                    <button id="loginButton" onclick="login()">Login</button>
+                    <span id="loginStatus" class="token-status">No bearer token yet.</span>
+                </div>
+                <div id="tokenBox" class="token-box"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>KYC Request</h2>
+            <div class="form-grid">
+                <div class="field-wide">
+                    <label for="webhookUrl">Webhook URL</label>
+                    <input id="webhookUrl" value="https://presales.nextgen.blueprism.com/regions/eu-central/api/workflows/v1/webhooks/Zikj60hhZehXi6BuID2Vs/sync">
+                </div>
+
+                <div>
+                    <label for="customerName">Customer Name</label>
+                    <input id="customerName" value="Jodie Pippa">
+                </div>
+
+                <div>
+                    <label for="customerId">Customer ID</label>
+                    <input id="customerId" value="KYC-10072">
+                </div>
+
+                <div>
+                    <label for="country">Country</label>
+                    <input id="country" value="GB">
+                </div>
+
+                <div>
+                    <label for="riskTier">Risk Tier</label>
+                    <select id="riskTier">
+                        <option value="standard">Standard</option>
+                        <option value="enhanced">Enhanced</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Passport</h2>
+                <div class="drop-zone" id="passportDrop" onclick="selectFile('passport')">
+                    <strong>Drop passport document here</strong>
+                    <span>Accepts PDF, PNG, JPG, JPEG, HEIC, or TIFF. The file will be base64 encoded into the payload.</span>
+                    <div id="passportSummary" class="file-summary"></div>
+                </div>
+                <input id="passportInput" type="file" accept=".pdf,.png,.jpg,.jpeg,.heic,.tif,.tiff,application/pdf,image/*" hidden>
+            </div>
+
+            <div class="card">
+                <h2>Utility Bill</h2>
+                <div class="drop-zone" id="utilityBillDrop" onclick="selectFile('utilityBill')">
+                    <strong>Drop utility bill here</strong>
+                    <span>Accepts PDF, PNG, JPG, JPEG, HEIC, or TIFF. The file will be base64 encoded into the payload.</span>
+                    <div id="utilityBillSummary" class="file-summary"></div>
+                </div>
+                <input id="utilityBillInput" type="file" accept=".pdf,.png,.jpg,.jpeg,.heic,.tif,.tiff,application/pdf,image/*" hidden>
+            </div>
+        </div>
+
+        <button id="sendButton" onclick="sendKycRequest()">Send KYC Webhook</button>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Payload Sent</h2>
+                <pre id="payloadOutput">Add passport and utility bill documents to build the payload.</pre>
+            </div>
+
+            <div class="card">
+                <h2>Webhook Response</h2>
+                <pre id="responseOutput">No response yet.</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_FILE_BYTES = 4 * 1024 * 1024;
+        let bearerToken = null;
+        const documents = {
+            passport: null,
+            utilityBill: null
+        };
+
+        async function login() {
+            const button = document.getElementById("loginButton");
+            const status = document.getElementById("loginStatus");
+            const tokenBox = document.getElementById("tokenBox");
+
+            button.disabled = true;
+            status.textContent = "Getting token...";
+            status.className = "token-status";
+            tokenBox.style.display = "none";
+            tokenBox.textContent = "";
+
+            try {
+                const res = await fetch("http://localhost:3000/token");
+                const data = await res.json();
+
+                if (!res.ok || !data.access_token) {
+                    throw new Error(data.error || `HTTP ${res.status}`);
+                }
+
+                bearerToken = data.access_token;
+                status.textContent = "Bearer token acquired.";
+                status.className = "token-status ok";
+            } catch (err) {
+                bearerToken = null;
+                status.textContent = "Login failed.";
+                status.className = "token-status bad";
+                tokenBox.style.display = "block";
+                tokenBox.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function selectFile(type) {
+            document.getElementById(`${type}Input`).click();
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes) {
+                return "0 B";
+            }
+
+            if (bytes < 1024) {
+                return `${bytes} B`;
+            }
+
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(1)} KB`;
+            }
+
+            return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = () => {
+                    const result = String(reader.result || "");
+                    resolve(result.includes(",") ? result.split(",")[1] : result);
+                };
+                reader.onerror = () => reject(reader.error || new Error("Failed to read file"));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleFile(type, file) {
+            const summary = document.getElementById(`${type}Summary`);
+
+            if (!file) {
+                return;
+            }
+
+            if (file.size > MAX_FILE_BYTES) {
+                summary.style.display = "block";
+                summary.textContent = `${file.name} is ${formatBytes(file.size)}. Use a file under ${formatBytes(MAX_FILE_BYTES)} so the proxy payload stays within its limit.`;
+                documents[type] = null;
+                updatePayloadPreview();
+                return;
+            }
+
+            summary.style.display = "block";
+            summary.textContent = `Encoding ${file.name}...`;
+
+            const base64 = await readFileAsBase64(file);
+            documents[type] = {
+                documentType: type === "passport" ? "passport" : "utility_bill",
+                fileName: file.name,
+                contentType: file.type || "application/octet-stream",
+                sizeBytes: file.size,
+                base64
+            };
+
+            summary.textContent = `${file.name} • ${file.type || "application/octet-stream"} • ${formatBytes(file.size)} • ${base64.length.toLocaleString()} base64 chars`;
+            updatePayloadPreview();
+        }
+
+        function createPayload() {
+            return {
+                eventId: "KYC-" + crypto.randomUUID(),
+                eventType: "kyc_documents_submitted",
+                receivedAt: new Date().toISOString(),
+                customer: {
+                    customerId: document.getElementById("customerId").value.trim(),
+                    name: document.getElementById("customerName").value.trim(),
+                    country: document.getElementById("country").value.trim(),
+                    riskTier: document.getElementById("riskTier").value
+                },
+                documents: [documents.passport, documents.utilityBill].filter(Boolean),
+                request: {
+                    source: "mock-kyc-html",
+                    requiresReview: true,
+                    checks: [
+                        "identity_document",
+                        "proof_of_address"
+                    ]
+                }
+            };
+        }
+
+        function updatePayloadPreview() {
+            document.getElementById("payloadOutput").textContent = JSON.stringify(createPayload(), null, 2);
+        }
+
+        async function sendKycRequest() {
+            const button = document.getElementById("sendButton");
+            const endpoint = document.getElementById("webhookUrl").value.trim();
+            const responseOutput = document.getElementById("responseOutput");
+            const payload = createPayload();
+
+            if (!bearerToken) {
+                responseOutput.textContent = "No bearer token available. Click Login first.";
+                return;
+            }
+
+            if (!endpoint) {
+                responseOutput.textContent = "Enter the KYC webhook URL first.";
+                return;
+            }
+
+            button.disabled = true;
+            document.getElementById("payloadOutput").textContent = JSON.stringify(payload, null, 2);
+            responseOutput.textContent = "Sending KYC webhook...";
+
+            try {
+                const response = await fetch("http://localhost:3000/proxy", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        endpoint,
+                        method: "POST",
+                        token: bearerToken,
+                        body: payload
+                    })
+                });
+
+                const responseText = await response.text();
+
+                responseOutput.textContent = JSON.stringify({
+                    status: response.status,
+                    response: responseText
+                }, null, 2);
+            } catch (err) {
+                responseOutput.textContent = String(err);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function wireDropZone(type) {
+            const dropZone = document.getElementById(`${type}Drop`);
+            const input = document.getElementById(`${type}Input`);
+
+            input.addEventListener("change", event => {
+                handleFile(type, event.target.files[0]);
+                event.target.value = "";
+            });
+
+            ["dragenter", "dragover"].forEach(eventName => {
+                dropZone.addEventListener(eventName, event => {
+                    event.preventDefault();
+                    dropZone.classList.add("dragover");
+                });
+            });
+
+            ["dragleave", "drop"].forEach(eventName => {
+                dropZone.addEventListener(eventName, event => {
+                    event.preventDefault();
+                    dropZone.classList.remove("dragover");
+                });
+            });
+
+            dropZone.addEventListener("drop", event => {
+                handleFile(type, event.dataTransfer.files[0]);
+            });
+        }
+
+        wireDropZone("passport");
+        wireDropZone("utilityBill");
+        ["customerName", "customerId", "country", "riskTier"].forEach(id => {
+            document.getElementById(id).addEventListener("input", updatePayloadPreview);
+        });
+        updatePayloadPreview();
+    </script>
+</body>
+
+</html>

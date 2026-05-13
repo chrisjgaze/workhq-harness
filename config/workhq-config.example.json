@@ -1,0 +1,11 @@
+{
+  "workhq": {
+    "tenantDomain": "example.nextgen.blueprism.com",
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "clientId": "00000000-0000-0000-0000-000000000000",
+    "clientSecret": "replace-me",
+    "region": "eu-central",
+    "environmentId": "00000000-0000-0000-0000-000000000000",
+    "defaultPageSize": 25
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "method": "POST",
+  "headers": {
+    "host": "example.nextgen.blueprism.com",
+    "content-type": "application/json",
+    "authorization": "Bearer redacted"
+  },
+  "body": {
+    "eventId": "EVT-10001",
+    "eventType": "customer_onboarding",
+    "receivedAt": "2026-04-28T13:45:04.673Z",
+    "customer": {
+      "id": "CUST-001",
+      "name": "Acme Trading LLC",
+      "country": "AE",
+      "customerType": "corporate"
+    },
+    "request": {
+      "priority": "high",
+      "amount": 12500.75,
+      "currency": "AED",
+      "requiresApproval": true
+    }
+  },
+  "queryParams": {}
+}
