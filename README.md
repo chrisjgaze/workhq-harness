@@ -67,9 +67,22 @@ npm test
 ## Project Layout
 
 - `public/` - browser-facing demo hub, pages, images, and archived web pages.
+- `public/styles/theme.css` - shared colors, backgrounds, shadows, and theme tokens.
+- `public/styles/base.css` - shared base layout and component styling.
 - `server/` - Node/Express proxy and local API endpoints.
 - `config/` - local WorkHQ configuration.
 - `data/` - mutable local runtime state, such as cached environments and Slack events.
 - `samples/` - example payloads and test data.
 - `docs/` - setup notes and implementation guides.
 - `notes/` - scratch notes kept out of the runtime path.
+
+## Customize The Theme
+
+Edit `public/styles/theme.css` to control the app-wide palette. The main tokens are:
+
+- `--navy`, `--deep-navy`, `--blue`, `--cyan`, `--aqua`
+- `--app-background`
+- `--card`, `--border`, `--field`
+- `--button-gradient`, `--shadow`, `--accent-shadow`
+
+The HTML pages load the shared theme file first, so changing those variables updates the demo hub and all harness pages together.

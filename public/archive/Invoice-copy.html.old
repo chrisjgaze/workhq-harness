@@ -2,18 +2,9 @@
 <html>
 <head>
   <title>WorkHQ Mock Invoice Event Sender</title>
+    <link rel="stylesheet" href="../styles/theme.css" />
+    <link rel="stylesheet" href="../styles/base.css" />
   <style>
-    :root {
-      --navy: #071a63;
-      --deep-navy: #041044;
-      --blue: #2078ff;
-      --cyan: #18d7e5;
-      --aqua: #5ff0e6;
-      --white: #ffffff;
-      --muted: #b7c4e8;
-      --card: rgba(255, 255, 255, 0.08);
-      --border: rgba(255, 255, 255, 0.18);
-    }
 
     * {
       box-sizing: border-box;
@@ -24,10 +15,7 @@
       min-height: 100vh;
       font-family: "Segoe UI", Arial, sans-serif;
       color: var(--white);
-      background:
-        radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
-        radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
-        linear-gradient(135deg, var(--deep-navy), var(--navy));
+      background: var(--app-background);
       padding: 36px;
     }
 
@@ -48,16 +36,16 @@
       height: 70px;
       border-radius: 50%;
       background:
-        radial-gradient(circle at center, #26128a 0 34%, transparent 35%),
-        conic-gradient(from 220deg, var(--cyan), var(--blue), #dff7ff, var(--cyan));
-      box-shadow: 0 0 30px rgba(24, 215, 229, 0.65);
+        radial-gradient(circle at center, var(--legacy-mark-core) 0 34%, transparent 35%),
+        conic-gradient(from 220deg, var(--cyan), var(--blue), var(--legacy-mark-light), var(--cyan));
+      box-shadow: 0 0 30px rgba(var(--cyan-rgb), 0.65);
       position: relative;
     }
 
     .brand-mark::after {
       content: "▲";
       position: absolute;
-      color: white;
+      color: var(--white);
       font-size: 34px;
       left: 18px;
       top: 16px;
@@ -89,7 +77,7 @@
       border-radius: 22px;
       padding: 24px;
       backdrop-filter: blur(14px);
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+      box-shadow: var(--shadow);
     }
 
     .card h2 {
@@ -100,13 +88,13 @@
     .invoice-row {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid var(--row-border);
       padding: 11px 0;
       color: var(--muted);
     }
 
     .invoice-row strong {
-      color: white;
+      color: var(--white);
     }
 
     .event {
@@ -114,15 +102,15 @@
       padding: 14px 16px;
       margin: 10px 0;
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(var(--white-rgb), 0.15);
+      background: var(--row-hover-strong);
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .event:hover {
       border-color: var(--cyan);
-      box-shadow: 0 0 18px rgba(24, 215, 229, 0.25);
+      box-shadow: 0 0 18px rgba(var(--cyan-rgb), 0.25);
       transform: translateY(-1px);
     }
 
@@ -137,27 +125,27 @@
       padding: 15px 18px;
       border: none;
       border-radius: 16px;
-      color: white;
+      color: var(--white);
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      background: linear-gradient(90deg, var(--cyan), var(--blue));
-      box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+      background: var(--button-gradient);
+      box-shadow: 0 0 26px rgba(var(--cyan-rgb), 0.35);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+      box-shadow: 0 0 36px rgba(var(--cyan-rgb), 0.55);
     }
 
     pre {
       min-height: 180px;
-      background: rgba(1, 8, 35, 0.72);
-      color: #d8fff8;
+      background: var(--field);
+      color: var(--code-text);
       padding: 16px;
       border-radius: 16px;
-      border: 1px solid rgba(95, 240, 230, 0.25);
+      border: 1px solid rgba(var(--aqua-rgb), 0.25);
       overflow: auto;
       font-size: 13px;
     }
@@ -170,10 +158,10 @@
       display: inline-block;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(24, 215, 229, 0.16);
+      background: var(--accent-soft);
       color: var(--aqua);
       font-size: 13px;
-      border: 1px solid rgba(24, 215, 229, 0.35);
+      border: 1px solid rgba(var(--cyan-rgb), 0.35);
     }
 
     @media (max-width: 850px) {

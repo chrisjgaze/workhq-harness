@@ -4,20 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>WorkHQ File Drop Sender</title>
+    <link rel="stylesheet" href="../styles/theme.css" />
+    <link rel="stylesheet" href="../styles/base.css" />
     <style>
-        :root {
-            --navy: #071a63;
-            --deep-navy: #041044;
-            --blue: #2078ff;
-            --cyan: #18d7e5;
-            --aqua: #5ff0e6;
-            --white: #ffffff;
-            --muted: #b7c4e8;
-            --card: rgba(255, 255, 255, 0.08);
-            --border: rgba(255, 255, 255, 0.18);
-            --danger: #ff6b8a;
-            --success: #5ff0a0;
-        }
 
         * {
             box-sizing: border-box;
@@ -28,10 +17,7 @@
             min-height: 100vh;
             font-family: "Segoe UI", Arial, sans-serif;
             color: var(--white);
-            background:
-                radial-gradient(circle at 12% 12%, rgba(24, 215, 229, 0.35), transparent 28%),
-                radial-gradient(circle at 82% 20%, rgba(32, 120, 255, 0.35), transparent 30%),
-                linear-gradient(135deg, var(--deep-navy), var(--navy));
+            background: var(--app-background);
             padding: 36px;
         }
 
@@ -58,7 +44,7 @@
             width: 70px;
             height: 70px;
             object-fit: contain;
-            filter: drop-shadow(0 0 12px rgba(24, 215, 229, 0.6));
+            filter: drop-shadow(0 0 12px rgba(var(--cyan-rgb), 0.6));
         }
 
         .brand h1 {
@@ -81,7 +67,7 @@
             border-radius: 18px;
             padding: 16px;
             backdrop-filter: blur(14px);
-            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            box-shadow: var(--shadow);
         }
 
         .status-panel strong {
@@ -102,7 +88,7 @@
             border-radius: 22px;
             padding: 24px;
             backdrop-filter: blur(14px);
-            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            box-shadow: var(--shadow);
         }
 
         .card h2 {
@@ -125,14 +111,14 @@
         }
 
         thead {
-            background: rgba(24, 215, 229, 0.16);
+            background: var(--accent-soft);
         }
 
         th,
         td {
             text-align: left;
             padding: 14px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            border-bottom: 1px solid var(--row-border);
         }
 
         th {
@@ -147,7 +133,7 @@
         }
 
         td strong {
-            color: white;
+            color: var(--white);
         }
 
         button {
@@ -156,16 +142,16 @@
             padding: 15px 18px;
             border: none;
             border-radius: 16px;
-            color: white;
+            color: var(--white);
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            background: linear-gradient(90deg, var(--cyan), var(--blue));
-            box-shadow: 0 0 26px rgba(24, 215, 229, 0.35);
+            background: var(--button-gradient);
+            box-shadow: 0 0 26px rgba(var(--cyan-rgb), 0.35);
         }
 
         button:hover {
-            box-shadow: 0 0 36px rgba(24, 215, 229, 0.55);
+            box-shadow: 0 0 36px rgba(var(--cyan-rgb), 0.55);
         }
 
         button:disabled {
@@ -175,11 +161,11 @@
 
         pre {
             min-height: 220px;
-            background: rgba(1, 8, 35, 0.72);
-            color: #d8fff8;
+            background: var(--field);
+            color: var(--code-text);
             padding: 16px;
             border-radius: 16px;
-            border: 1px solid rgba(95, 240, 230, 0.25);
+            border: 1px solid rgba(var(--aqua-rgb), 0.25);
             overflow: auto;
             font-size: 13px;
             white-space: pre-wrap;
@@ -189,10 +175,10 @@
             display: inline-block;
             padding: 6px 10px;
             border-radius: 999px;
-            background: rgba(24, 215, 229, 0.16);
+            background: var(--accent-soft);
             color: var(--aqua);
             font-size: 13px;
-            border: 1px solid rgba(24, 215, 229, 0.35);
+            border: 1px solid rgba(var(--cyan-rgb), 0.35);
             white-space: nowrap;
         }
 

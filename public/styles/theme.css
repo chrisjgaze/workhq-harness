@@ -1,0 +1,46 @@
+:root {
+  color-scheme: dark;
+
+  --navy: #071a63;
+  --deep-navy: #041044;
+  --blue: #2078ff;
+  --cyan: #18d7e5;
+  --aqua: #5ff0e6;
+  --white: #ffffff;
+  --muted: #b7c4e8;
+  --danger: #ff6b8a;
+  --success: #5ff0a0;
+
+  --cyan-rgb: 24, 215, 229;
+  --blue-rgb: 32, 120, 255;
+  --aqua-rgb: 95, 240, 230;
+  --white-rgb: 255, 255, 255;
+  --field-rgb: 1, 8, 35;
+
+  --app-background:
+    radial-gradient(circle at 12% 12%, rgba(var(--cyan-rgb), 0.35), transparent 28%),
+    radial-gradient(circle at 82% 20%, rgba(var(--blue-rgb), 0.35), transparent 30%),
+    linear-gradient(135deg, var(--deep-navy), var(--navy));
+
+  --card: rgba(var(--white-rgb), 0.08);
+  --border: rgba(var(--white-rgb), 0.18);
+  --field: rgba(var(--field-rgb), 0.72);
+  --field-soft: rgba(var(--field-rgb), 0.44);
+  --field-muted: rgba(var(--field-rgb), 0.38);
+  --modal-bg: rgba(5, 18, 68, 0.96);
+  --modal-bg-strong: rgba(5, 18, 68, 0.98);
+  --accent-soft: rgba(var(--cyan-rgb), 0.16);
+  --accent-softer: rgba(var(--cyan-rgb), 0.12);
+  --row-border: rgba(var(--white-rgb), 0.12);
+  --row-hover: rgba(var(--white-rgb), 0.06);
+  --row-hover-strong: rgba(var(--white-rgb), 0.07);
+  --code-text: #d8fff8;
+  --legacy-mark-core: #26128a;
+  --legacy-mark-light: #dff7ff;
+
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  --modal-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+  --accent-shadow: 0 0 26px rgba(var(--cyan-rgb), 0.35);
+  --logo-glow: drop-shadow(0 0 12px rgba(var(--cyan-rgb), 0.6));
+  --button-gradient: linear-gradient(90deg, var(--cyan), var(--blue));
+}

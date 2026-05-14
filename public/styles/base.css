@@ -1,0 +1,155 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--white);
+  background: var(--app-background);
+  padding: 36px;
+}
+
+.shell {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand-logo,
+.logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: var(--logo-glow);
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 42px;
+}
+
+.brand span,
+.subtitle {
+  display: block;
+  color: var(--muted);
+}
+
+.card,
+.status-panel,
+.config-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+}
+
+.card {
+  border-radius: 22px;
+  padding: 24px;
+}
+
+.status-panel,
+.config-panel {
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+thead {
+  background: var(--accent-soft);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--row-border);
+}
+
+th {
+  color: var(--aqua);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td {
+  color: var(--muted);
+}
+
+td strong {
+  color: var(--white);
+}
+
+input,
+select,
+textarea {
+  background: var(--field);
+  color: var(--white);
+  border: 1px solid rgba(var(--aqua-rgb), 0.35);
+}
+
+button {
+  color: var(--white);
+  cursor: pointer;
+  background: var(--button-gradient);
+  box-shadow: var(--accent-shadow);
+}
+
+pre {
+  background: var(--field);
+  color: var(--code-text);
+  border: 1px solid rgba(var(--aqua-rgb), 0.25);
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--aqua);
+  font-size: 13px;
+  border: 1px solid rgba(var(--cyan-rgb), 0.35);
+}
+
+@media (max-width: 950px) {
+  .topbar {
+    flex-direction: column;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand h1 {
+    font-size: 32px;
+  }
+}
