@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>WorkHQ Salesforce Event Sender</title>
+    <script src="../scripts/theme-switcher.js"></script>
     <link rel="stylesheet" href="../styles/theme.css" />
     <link rel="stylesheet" href="../styles/base.css" />
     <style>
@@ -29,7 +30,12 @@
   </div>
   <p>Create a mock Salesforce Case/Lead for SaaS connector demos.</p>
   <button onclick="createRecord()">Create Mock Case</button>
-  <pre id="out"></pre>
+  <details class="collapsible-output">
+    <summary><span class="summary-kicker">Output</span><span class="summary-title">Payload and Response</span><span class="summary-toggle" aria-hidden="true"></span></summary>
+    <div class="output-content">
+      <pre id="out"></pre>
+    </div>
+  </details>
 <script>
 async function createRecord(){
  const payload={eventId:'EVT-'+crypto.randomUUID(),eventType:'salesforce_case_created',receivedAt:new Date().toISOString(),source:'mock-salesforce-html',businessObject:{objectType:'Case',fields:{Subject:'Invoice dispute INV-10045',Status:'New',Priority:'High',Origin:'Web',Description:'Customer disputes invoice amount and requests review.'}},request:{priority:'high',requiresApproval:true,source:'mock-salesforce-html'}};

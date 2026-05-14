@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>WorkHQ Invoice Event Sender</title>
+    <script src="../scripts/theme-switcher.js"></script>
     <link rel="stylesheet" href="../styles/theme.css" />
     <link rel="stylesheet" href="../styles/base.css" />
     <style>
@@ -16,7 +17,7 @@
             margin: 0;
             min-height: 100vh;
             font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--white);
+            color: var(--text);
             background: var(--app-background);
             padding: 36px;
         }
@@ -59,50 +60,6 @@
             color: var(--muted);
             margin-bottom: 2px;
         }
-
-        .login-panel {
-            width: 360px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 16px;
-            backdrop-filter: blur(14px);
-            box-shadow: var(--shadow);
-        }
-
-        .login-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .login-row button {
-            margin-top: 0;
-            width: auto;
-            padding: 11px 18px;
-            border-radius: 12px;
-        }
-
-        .token-status {
-            font-size: 13px;
-            margin-top: 10px;
-            color: var(--muted);
-        }
-
-        .token-box {
-            margin-top: 10px;
-            max-height: 92px;
-            overflow: auto;
-            word-break: break-all;
-            background: var(--field);
-            border: 1px solid rgba(var(--aqua-rgb), 0.25);
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 11px;
-            color: var(--code-text);
-            display: none;
-        }
-
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -154,7 +111,7 @@
         }
 
         td strong {
-            color: var(--white);
+            color: var(--text);
         }
 
         tr:hover {
@@ -164,7 +121,7 @@
         select {
             width: 100%;
             background: var(--field);
-            color: var(--white);
+            color: var(--text);
             border: 1px solid rgba(var(--aqua-rgb), 0.35);
             border-radius: 10px;
             padding: 8px;
@@ -181,7 +138,7 @@
             padding: 15px 18px;
             border: none;
             border-radius: 16px;
-            color: var(--white);
+            color: var(--button-text);
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
@@ -219,24 +176,10 @@
             border: 1px solid rgba(var(--cyan-rgb), 0.35);
             white-space: nowrap;
         }
-
-        .ok {
-            color: var(--success);
-        }
-
-        .bad {
-            color: var(--danger);
-        }
-
         @media (max-width: 950px) {
             .topbar {
                 flex-direction: column;
             }
-
-            .login-panel {
-                width: 100%;
-            }
-
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -260,14 +203,6 @@
                     <h1>WorkHQ Invoice Sender</h1>
                 </div>
             </div>
-
-            <div class="login-panel">
-                <div class="login-row">
-                    <button id="loginButton" onclick="login()">Login</button>
-                    <span id="loginStatus" class="token-status">No bearer token yet.</span>
-                </div>
-                <div id="tokenBox" class="token-box"></div>
-            </div>
         </div>
 
         <div class="card">
@@ -288,56 +223,37 @@
                 <tbody id="invoiceTable"></tbody>
             </table>
 
-            <button onclick="sendSelectedInvoices()">Send Selected to WorkHQ</button>
+            <button id="sendButton" onclick="sendSelectedInvoices()">Send Selected to WorkHQ</button>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <h2>Payload Sent</h2>
-                <pre id="payloadOutput">Nothing sent yet.</pre>
-            </div>
+        <details class="collapsible-output">
+            <summary><span class="summary-kicker">Output</span><span class="summary-title">Payload and Response</span><span class="summary-toggle" aria-hidden="true"></span></summary>
+            <div class="grid">
+                <div class="card">
+                    <h2>Payload Sent</h2>
+                    <pre id="payloadOutput">Nothing sent yet.</pre>
+                </div>
 
-            <div class="card">
-                <h2>Webhook Response</h2>
-                <pre id="responseOutput">No response yet.</pre>
+                <div class="card">
+                    <h2>Webhook Response</h2>
+                    <pre id="responseOutput">No response yet.</pre>
+                </div>
             </div>
-        </div>
+        </details>
     </div>
 
     <script>
         const WEBHOOK_URL = "https://presales.nextgen.blueprism.com/regions/eu-central/api/workflows/v1/webhooks/xKEZYznqXRZZy8o3ARPkn/sync";
 
-        let bearerToken = null;
+        async function getBearerToken() {
+            const res = await fetch("http://localhost:3000/token");
+            const data = await res.json();
 
-        async function login() {
-            const button = document.getElementById("loginButton");
-            const status = document.getElementById("loginStatus");
-            const tokenBox = document.getElementById("tokenBox");
-
-            button.disabled = true;
-            status.textContent = "Getting token...";
-            status.className = "token-status";
-            tokenBox.style.display = "none";
-            tokenBox.textContent = "";
-
-            try {
-                const res = await fetch("http://localhost:3000/token");
-                const data = await res.json();
-                bearerToken = data.access_token;
-
-                status.textContent = "Bearer token acquired.";
-                status.className = "token-status ok";
-            } catch (err) {
-                bearerToken = null;
-
-                status.textContent = "Login failed.";
-                status.className = "token-status bad";
-
-                tokenBox.style.display = "block";
-                tokenBox.textContent = String(err);
-            } finally {
-                button.disabled = false;
+            if (!res.ok || !data.access_token) {
+                throw new Error(data.error || `Token request failed with HTTP ${res.status}`);
             }
+
+            return data.access_token;
         }
 
         const invoices = [
@@ -393,13 +309,8 @@
         }
 
         async function sendSelectedInvoices() {
+            const button = document.getElementById("sendButton");
             const selected = [...document.querySelectorAll(".invoice-check:checked")];
-
-            if (!bearerToken) {
-                document.getElementById("responseOutput").textContent =
-                    "No bearer token available. Click Login first.";
-                return;
-            }
 
             if (selected.length === 0) {
                 document.getElementById("responseOutput").textContent =
@@ -409,6 +320,21 @@
 
             const results = [];
             const sentPayloads = [];
+            let bearerToken;
+
+            button.disabled = true;
+            document.getElementById("responseOutput").textContent = "Getting token...";
+
+            try {
+                bearerToken = await getBearerToken();
+            } catch (error) {
+                document.getElementById("responseOutput").textContent =
+                    `Token request failed:\n${String(error)}`;
+                button.disabled = false;
+                return;
+            }
+
+            document.getElementById("responseOutput").textContent = "Sending selected invoices...";
 
             for (const checkbox of selected) {
                 const index = Number(checkbox.value);
@@ -456,6 +382,7 @@
 
             document.getElementById("responseOutput").textContent =
                 JSON.stringify(results, null, 2);
+            button.disabled = false;
         }
 
         renderInvoices();

@@ -78,11 +78,18 @@ npm test
 
 ## Customize The Theme
 
-Edit `public/styles/theme.css` to control the app-wide palette. The main tokens are:
+Use the floating theme selector in the bottom-right corner of any page to switch between:
+
+- `WorkHQ Dark`
+- `SS&C Blue Prism`
+
+The selection is saved in browser local storage and reused across the demo hub and all harness pages.
+
+Edit `public/styles/theme.css` to control the app-wide palettes. The main tokens are:
 
 - `--navy`, `--deep-navy`, `--blue`, `--cyan`, `--aqua`
 - `--app-background`
 - `--card`, `--border`, `--field`
 - `--button-gradient`, `--shadow`, `--accent-shadow`
 
-The HTML pages load the shared theme file first, so changing those variables updates the demo hub and all harness pages together.
+The HTML pages load the shared theme file and `public/scripts/theme-switcher.js`, so changing those variables updates the demo hub and all harness pages together.

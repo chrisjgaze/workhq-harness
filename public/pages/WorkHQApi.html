@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>WorkHQ REST API Console</title>
+    <script src="../scripts/theme-switcher.js"></script>
     <link rel="stylesheet" href="../styles/theme.css" />
     <link rel="stylesheet" href="../styles/base.css" />
     <style>
@@ -16,7 +17,7 @@
             margin: 0;
             min-height: 100vh;
             font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--white);
+            color: var(--text);
             background: var(--app-background);
             padding: 36px;
         }
@@ -169,7 +170,7 @@
         textarea {
             width: 100%;
             background: var(--field);
-            color: var(--white);
+            color: var(--text);
             border: 1px solid rgba(var(--aqua-rgb), 0.35);
             border-radius: 12px;
             padding: 12px;
@@ -189,7 +190,7 @@
             padding: 15px 18px;
             border: none;
             border-radius: 16px;
-            color: var(--white);
+            color: var(--button-text);
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
@@ -213,7 +214,7 @@
             border: 1px solid rgba(var(--aqua-rgb), 0.24);
             border-radius: 12px;
             background: var(--field-soft);
-            color: var(--white);
+            color: var(--text);
             text-align: left;
             box-shadow: none;
             font-size: 13px;
@@ -543,8 +544,9 @@
                 </div>
             </div>
 
-            <div class="card workspace-card result-card">
-                <h2>Output</h2>
+            <details class="card workspace-card result-card collapsible-output">
+                <summary><span class="summary-kicker">Output</span><span class="summary-title">API Output</span><span class="summary-toggle" aria-hidden="true"></span></summary>
+                <div class="output-content">
                 <div class="output-toolbar">
                     <div class="tabs">
                         <button id="responseTab" class="tab-button active" onclick="showTab('response')">Response</button>
@@ -558,7 +560,8 @@
                 <div id="requestPanel" class="tab-panel">
                     <pre id="requestOutput">No request sent yet.</pre>
                 </div>
-            </div>
+                </div>
+            </details>
         </div>
     </div>
 
