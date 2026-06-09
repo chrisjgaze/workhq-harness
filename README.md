@@ -41,8 +41,10 @@ npm install
 ```powershell
 git clone <repository-url>
 cd <repository-folder>
-npm install
+.\run_demo.bat
 ```
+
+`run_demo.bat` checks for Node.js and npm, installs dependencies when needed, creates `config\workhq-config.json` from the example if it is missing, and starts both services.
 
 ## Configure WorkHQ
 
@@ -59,6 +61,8 @@ cp config/workhq-config.example.json config/workhq-config.json
 ```powershell
 Copy-Item config/workhq-config.example.json config/workhq-config.json
 ```
+
+The Windows batch launcher creates this file automatically when it does not exist.
 
 Edit `config/workhq-config.json`:
 
@@ -99,6 +103,12 @@ npm run dev
 ```
 
 This command works on macOS, Windows PowerShell, Command Prompt, and Linux.
+
+Windows users can instead double-click `run_demo.bat` or run:
+
+```powershell
+.\run_demo.bat
+```
 
 Open:
 
@@ -159,6 +169,7 @@ Prefer short-lived AWS credentials or a suitably restricted development identity
 | `npm run proxy` | Start only the Express proxy |
 | `npm run web` | Start only the static demo hub |
 | `npm test` | Validate the server JavaScript syntax |
+| `run_demo.bat` | Windows quick start: install, configure, and run |
 
 ## Project Layout
 
