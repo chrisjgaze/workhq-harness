@@ -13,6 +13,7 @@ The project contains a static browser interface and a small Express backend. The
 - WorkHQ service-account authentication through a local Express proxy
 - WorkHQ environment syncing and selection
 - Webhook request testing
+- Browser-based basic form builder with authenticated webhook submission
 - Optional AWS S3 file uploads
 - Switchable customer themes
 

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkHQ Form Builder</title>
+    <script src="../scripts/theme-switcher.js"></script>
+    <link rel="stylesheet" href="../styles/theme.css" />
+    <link rel="stylesheet" href="../styles/base.css" />
+    <style>
+        .builder-grid {
+            display: grid;
+            grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+            gap: 22px;
+            transition: grid-template-columns 0.2s ease;
+        }
+
+        .builder-grid.builder-hidden {
+            grid-template-columns: 1fr;
+        }
+
+        .builder-panel {
+            min-width: 0;
+        }
+
+        .builder-grid.builder-hidden .builder-panel {
+            display: none;
+        }
+
+        .preview-card {
+            position: relative;
+            min-width: 0;
+            padding-top: 76px;
+        }
+
+        .builder-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            min-height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 9px 15px;
+            background: var(--summary-pill);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            font-size: 13px;
+            line-height: 1.2;
+            backdrop-filter: blur(14px);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .builder-toggle:hover {
+            border-color: var(--cyan);
+            box-shadow: var(--accent-shadow);
+        }
+
+        .builder-toggle-label {
+            font-weight: 700;
+        }
+
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 7px;
+            color: var(--aqua);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border-radius: 12px;
+            padding: 12px;
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        button {
+            border: 0;
+            border-radius: 13px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .button-secondary,
+        .field-remove {
+            border: 1px solid var(--border);
+            background: var(--field-soft);
+            color: var(--text);
+            box-shadow: none;
+        }
+
+        .field-remove {
+            padding: 8px 10px;
+            color: var(--danger);
+        }
+
+        .field-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .field-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid var(--row-border);
+            border-radius: 14px;
+            padding: 12px;
+            background: var(--field-soft);
+        }
+
+        .field-item strong,
+        .field-item small {
+            display: block;
+        }
+
+        .field-item small,
+        .hint {
+            color: var(--muted);
+        }
+
+        .hint {
+            line-height: 1.5;
+            font-size: 13px;
+        }
+
+        .preview-form {
+            display: grid;
+            gap: 2px;
+        }
+
+        .preview-form button {
+            margin-top: 18px;
+            padding: 15px 18px;
+        }
+
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+            color: var(--text);
+        }
+
+        .checkbox-field input {
+            width: auto;
+        }
+
+        pre {
+            min-height: 150px;
+            overflow: auto;
+            border-radius: 14px;
+            padding: 14px;
+            white-space: pre-wrap;
+        }
+
+        .notification {
+            position: fixed;
+            top: 22px;
+            left: 22px;
+            z-index: 30;
+            max-width: min(380px, calc(100vw - 44px));
+            border: 1px solid rgba(var(--aqua-rgb), 0.38);
+            border-radius: 14px;
+            padding: 13px 16px;
+            background: var(--card);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.72);
+            transform-origin: center;
+            transition: top 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                left 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.25s ease,
+                transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+            backdrop-filter: blur(14px);
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        .notification.settled {
+            transform: scale(1);
+        }
+
+        .notification.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        @media (max-width: 900px) {
+            .builder-grid,
+            .topbar {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .builder-toggle,
+            .builder-grid.builder-hidden .builder-toggle {
+                position: static;
+                margin-bottom: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="notification" class="notification" role="status" aria-live="polite"></div>
+    <div class="shell">
+        <div class="topbar">
+            <div class="brand">
+                <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
+                    <img src="../assets/logo.png" class="brand-logo" data-theme-logo data-default-logo="../assets/logo.png">
+                </a>
+                <div>
+                    <span>SS&amp;C Blue Prism</span>
+                    <h1>WorkHQ Form Builder</h1>
+                </div>
+            </div>
+        </div>
+
+        <div id="builderGrid" class="builder-grid builder-hidden">
+            <section class="card builder-panel">
+                <h2>Build Form</h2>
+                <p class="hint">Create fields and save the definition in this browser. Webhook submissions are authenticated by the local proxy.</p>
+
+                <label for="formName">Form Name</label>
+                <input id="formName" value="Customer Request" oninput="renderPreview()" />
+
+                <label for="webhookUrl">WorkHQ Webhook URL</label>
+                <input id="webhookUrl" type="text" inputmode="url" spellcheck="false"
+                    placeholder="https://.../webhooks/.../sync" />
+
+                <h3>Add Field</h3>
+                <label for="fieldLabel">Label</label>
+                <input id="fieldLabel" placeholder="Customer name" />
+
+                <label for="fieldKey">Payload Key</label>
+                <input id="fieldKey" placeholder="customerName" />
+
+                <label for="fieldType">Type</label>
+                <select id="fieldType" onchange="toggleOptions()">
+                    <option value="text">Text</option>
+                    <option value="email">Email</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="textarea">Long Text</option>
+                    <option value="select">Select</option>
+                    <option value="checkbox">Checkbox</option>
+                </select>
+
+                <div id="optionsGroup" hidden>
+                    <label for="fieldOptions">Options</label>
+                    <input id="fieldOptions" placeholder="Low, Medium, High" />
+                </div>
+
+                <label class="checkbox-field">
+                    <input id="fieldRequired" type="checkbox" />
+                    Required field
+                </label>
+
+                <div class="button-row">
+                    <button type="button" onclick="addField()">Add Field</button>
+                    <button type="button" class="button-secondary" onclick="saveDefinition()">Save Form</button>
+                    <button type="button" class="button-secondary" onclick="resetDefinition()">Reset</button>
+                </div>
+
+                <div id="fieldList" class="field-list"></div>
+            </section>
+
+            <section class="card preview-card">
+                <button id="builderToggle" class="builder-toggle" type="button" onclick="toggleBuilder()"
+                    aria-label="Show form builder" title="Show form builder">
+                    <span id="builderToggleLabel" class="builder-toggle-label">Show builder</span>
+                </button>
+                <h2 id="previewTitle">Customer Request</h2>
+                <form id="previewForm" class="preview-form" onsubmit="submitForm(event)"></form>
+
+                <details class="collapsible-output">
+                    <summary>
+                        <span class="summary-kicker">Output</span>
+                        <span class="summary-title">Submission Result</span>
+                        <span class="summary-toggle"></span>
+                    </summary>
+                    <div class="output-content">
+                        <pre id="responseOutput">No form submitted yet.</pre>
+                    </div>
+                </details>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "workhq_basic_form_definition";
+        const proxyProtocol = ["http:", "https:"].includes(window.location.protocol) ? window.location.protocol : "http:";
+        const PROXY_BASE_URL = `${proxyProtocol}//${window.location.hostname || "localhost"}:3000`;
+        let notificationTimer = null;
+
+        function createId() {
+            if (typeof globalThis.crypto?.randomUUID === "function") {
+                try {
+                    return globalThis.crypto.randomUUID();
+                } catch {
+                    // Fall back for browsers that expose randomUUID but reject the current context.
+                }
+            }
+
+            return `field-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        }
+
+        const defaultFields = [
+            { id: createId(), label: "Customer Name", key: "customerName", type: "text", required: true, options: [] },
+            { id: createId(), label: "Email", key: "email", type: "email", required: true, options: [] },
+            { id: createId(), label: "Request Details", key: "requestDetails", type: "textarea", required: false, options: [] }
+        ];
+        let fields = loadDefinition()?.fields || defaultFields;
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function makeKey(label) {
+            return label
+                .trim()
+                .replace(/[^a-zA-Z0-9 ]/g, "")
+                .replace(/\s+(.)/g, (_, character) => character.toUpperCase())
+                .replace(/^./, character => character.toLowerCase());
+        }
+
+        function loadDefinition() {
+            try {
+                const definition = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (definition) {
+                    document.addEventListener("DOMContentLoaded", () => {
+                        document.getElementById("formName").value = definition.formName || "Customer Request";
+                        document.getElementById("webhookUrl").value = definition.webhookUrl || "";
+                        renderPreview();
+                    });
+                }
+                return definition;
+            } catch {
+                return null;
+            }
+        }
+
+        function toggleOptions() {
+            document.getElementById("optionsGroup").hidden = document.getElementById("fieldType").value !== "select";
+        }
+
+        function toggleBuilder() {
+            const grid = document.getElementById("builderGrid");
+            const toggle = document.getElementById("builderToggle");
+            const label = document.getElementById("builderToggleLabel");
+            const hidden = grid.classList.toggle("builder-hidden");
+
+            label.textContent = hidden ? "Show builder" : "Hide builder";
+            toggle.setAttribute("aria-label", hidden ? "Show form builder" : "Hide form builder");
+            toggle.title = hidden ? "Show form builder" : "Hide form builder";
+        }
+
+        function notify(message, type = "", sourceElement = null) {
+            const notification = document.getElementById("notification");
+            const sourceRect = sourceElement?.getBoundingClientRect();
+
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.left = `${sourceRect?.left ?? 22}px`;
+            notification.style.top = `${sourceRect?.top ?? 22}px`;
+
+            window.clearTimeout(notificationTimer);
+            window.requestAnimationFrame(() => {
+                notification.classList.add("show");
+
+                window.requestAnimationFrame(() => {
+                    const finalLeft = Math.max(22, window.innerWidth - notification.offsetWidth - 22);
+                    notification.style.left = `${finalLeft}px`;
+                    notification.style.top = "22px";
+                    notification.classList.add("settled");
+                });
+            });
+
+            notificationTimer = window.setTimeout(() => {
+                notification.classList.remove("show");
+                window.setTimeout(() => notification.classList.remove("settled"), 250);
+            }, 120000);
+        }
+
+        function addField() {
+            const labelInput = document.getElementById("fieldLabel");
+            const keyInput = document.getElementById("fieldKey");
+            const type = document.getElementById("fieldType").value;
+            const label = labelInput.value.trim();
+            const key = keyInput.value.trim() || makeKey(label);
+
+            if (!label || !key) {
+                window.alert("Enter a field label and payload key.");
+                return;
+            }
+
+            if (fields.some(field => field.key === key)) {
+                window.alert("Payload keys must be unique.");
+                return;
+            }
+
+            fields.push({
+                id: createId(),
+                label,
+                key,
+                type,
+                required: document.getElementById("fieldRequired").checked,
+                options: type === "select"
+                    ? document.getElementById("fieldOptions").value.split(",").map(value => value.trim()).filter(Boolean)
+                    : []
+            });
+
+            labelInput.value = "";
+            keyInput.value = "";
+            document.getElementById("fieldOptions").value = "";
+            document.getElementById("fieldRequired").checked = false;
+            renderPreview();
+        }
+
+        function removeField(id) {
+            fields = fields.filter(field => field.id !== id);
+            renderPreview();
+        }
+
+        function renderField(field) {
+            const required = field.required ? "required" : "";
+            const label = `<label for="field-${field.id}">${escapeHtml(field.label)}${field.required ? " *" : ""}</label>`;
+
+            if (field.type === "textarea") {
+                return `${label}<textarea id="field-${field.id}" name="${escapeHtml(field.key)}" ${required}></textarea>`;
+            }
+
+            if (field.type === "select") {
+                return `${label}<select id="field-${field.id}" name="${escapeHtml(field.key)}" ${required}>
+                    <option value="">Select an option</option>
+                    ${field.options.map(option => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}
+                </select>`;
+            }
+
+            if (field.type === "checkbox") {
+                return `<label class="checkbox-field"><input id="field-${field.id}" name="${escapeHtml(field.key)}" type="checkbox" ${required}>${escapeHtml(field.label)}</label>`;
+            }
+
+            return `${label}<input id="field-${field.id}" name="${escapeHtml(field.key)}" type="${field.type}" ${required}>`;
+        }
+
+        function renderPreview() {
+            document.getElementById("previewTitle").textContent = document.getElementById("formName").value || "Untitled Form";
+            document.getElementById("previewForm").innerHTML =
+                fields.map(renderField).join("") +
+                `<button id="submitButton" type="submit">Submit to Webhook</button>`;
+            document.getElementById("fieldList").innerHTML = fields.map(field => `
+                <div class="field-item">
+                    <div>
+                        <strong>${escapeHtml(field.label)}</strong>
+                        <small>${escapeHtml(field.key)} · ${escapeHtml(field.type)}${field.required ? " · required" : ""}</small>
+                    </div>
+                    <button type="button" class="field-remove" onclick="removeField('${field.id}')">Remove</button>
+                </div>
+            `).join("");
+        }
+
+        function saveDefinition() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                formName: document.getElementById("formName").value.trim(),
+                webhookUrl: document.getElementById("webhookUrl").value.trim(),
+                fields
+            }));
+            document.getElementById("responseOutput").textContent = "Form definition saved in this browser.";
+        }
+
+        function resetDefinition() {
+            if (!window.confirm("Reset the form builder?")) return;
+            localStorage.removeItem(STORAGE_KEY);
+            fields = defaultFields.map(field => ({ ...field, id: createId() }));
+            document.getElementById("formName").value = "Customer Request";
+            document.getElementById("webhookUrl").value = "";
+            renderPreview();
+        }
+
+        async function submitForm(event) {
+            event.preventDefault();
+            const endpoint = document.getElementById("webhookUrl").value.trim();
+            const output = document.getElementById("responseOutput");
+            const button = document.getElementById("submitButton");
+
+            if (!endpoint) {
+                output.textContent = "Enter a WorkHQ webhook URL.";
+                return;
+            }
+
+            let webhookUrl;
+            try {
+                webhookUrl = new URL(endpoint);
+            } catch {
+                output.textContent = "The webhook URL is invalid. Paste the complete HTTPS WorkHQ webhook URL.";
+                return;
+            }
+
+            if (webhookUrl.protocol !== "https:" || !webhookUrl.pathname.includes("/webhooks/")) {
+                output.textContent = "Enter a complete HTTPS WorkHQ webhook URL containing /webhooks/.";
+                return;
+            }
+
+            const values = {};
+            fields.forEach(field => {
+                const input = document.getElementById(`field-${field.id}`);
+                values[field.key] = field.type === "checkbox" ? input.checked : input.value;
+            });
+
+            const payload = {
+                formName: document.getElementById("formName").value.trim() || "Untitled Form",
+                submittedAt: new Date().toISOString(),
+                values
+            };
+
+            button.disabled = true;
+            output.textContent = "Submitting...";
+
+            try {
+                const response = await fetch(`${PROXY_BASE_URL}/form-webhook`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ endpoint: webhookUrl.href, body: payload })
+                });
+                const responseText = await response.text();
+                let data = responseText;
+
+                try {
+                    data = responseText ? JSON.parse(responseText) : null;
+                } catch {
+                    data = responseText;
+                }
+
+                output.textContent = JSON.stringify({ payload, response: data }, null, 2);
+
+                if (response.ok && data?.ok) {
+                    notify("Form submitted successfully.", "success", button);
+                }
+            } catch (error) {
+                output.textContent = `Submission failed: ${error.message || String(error)}`;
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        renderPreview();
+    </script>
+</body>
+
+</html>

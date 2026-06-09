@@ -416,6 +416,63 @@ app.post("/proxy", async (req, res) => {
   }
 });
 
+app.post("/form-webhook", async (req, res) => {
+  try {
+    const { endpoint, body } = req.body;
+
+    if (!endpoint) {
+      return res.status(400).json({ ok: false, error: "endpoint is required" });
+    }
+
+    let url;
+    try {
+      url = new URL(endpoint);
+    } catch {
+      return res.status(400).json({ ok: false, error: "endpoint must be a valid URL" });
+    }
+
+    if (url.protocol !== "https:") {
+      return res.status(400).json({ ok: false, error: "endpoint must use HTTPS" });
+    }
+
+    const config = getWorkHQConfig();
+
+    if (url.hostname !== config.domain || !url.pathname.includes("/webhooks/")) {
+      return res.status(400).json({
+        ok: false,
+        error: "endpoint must be a webhook URL on the configured WorkHQ tenant domain"
+      });
+    }
+
+    const tokenData = await getWorkHQToken();
+    const upstreamRes = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${tokenData.access_token}`
+      },
+      body: JSON.stringify(body || {})
+    });
+    const responseText = await upstreamRes.text();
+    let responseBody = responseText;
+
+    try {
+      responseBody = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      responseBody = responseText;
+    }
+
+    res.status(upstreamRes.status === 204 ? 200 : upstreamRes.status).json({
+      ok: upstreamRes.ok,
+      status: upstreamRes.status,
+      statusText: upstreamRes.statusText,
+      body: responseBody
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: String(err) });
+  }
+});
+
 function loadSlackEvents() {
   if (!fs.existsSync(slackEventsPath)) {
     return [];
