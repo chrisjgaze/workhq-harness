@@ -180,7 +180,7 @@
 
 <div class="shell">
   <div class="brand">
-    <img src="../assets/logo.jpg" class="brand-logo">
+    <img src="../assets/logo.jpg" class="brand-logo" data-theme-logo data-default-logo="../assets/logo.jpg">
     <div>
       <span>SS&C Blue Prism</span>
       <h1>WorkHQ Invoice Event Sender</h1>

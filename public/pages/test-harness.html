@@ -68,6 +68,8 @@
             padding: 24px;
             backdrop-filter: blur(14px);
             box-shadow: var(--shadow);
+            min-width: 0;
+            overflow: hidden;
         }
 
         .login-panel {
@@ -113,7 +115,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             gap: 22px;
             margin-top: 22px;
         }
@@ -131,6 +133,8 @@
         select,
         textarea {
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
             background: var(--field);
             color: var(--text);
             border: 1px solid rgba(var(--aqua-rgb), 0.35);
@@ -143,6 +147,7 @@
         textarea {
             min-height: 360px;
             font-family: Consolas, Monaco, monospace;
+            overflow-x: auto;
             resize: vertical;
         }
 
@@ -170,6 +175,7 @@
         }
 
         pre {
+            max-width: 100%;
             min-height: 220px;
             background: var(--field);
             color: var(--code-text);
@@ -177,6 +183,7 @@
             border-radius: 16px;
             border: 1px solid rgba(var(--aqua-rgb), 0.25);
             overflow: auto;
+            overflow-wrap: anywhere;
             font-size: 13px;
         }
 
@@ -213,7 +220,7 @@
         <div class="topbar">
             <div class="brand">
                 <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
-                    <img src="../assets/logo.png" class="brand-logo">
+                    <img src="../assets/logo.png" class="brand-logo" data-theme-logo data-default-logo="../assets/logo.png">
                 </a>
                 <div>
                     <span>SS&C Blue Prism</span>

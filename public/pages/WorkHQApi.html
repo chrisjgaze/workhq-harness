@@ -120,7 +120,7 @@
             display: grid;
             grid-template-columns: 320px minmax(360px, 1fr) minmax(420px, 1.15fr);
             gap: 22px;
-            align-items: start;
+            align-items: stretch;
         }
 
         .workspace-card {
@@ -477,7 +477,7 @@
         <div class="topbar">
             <div class="brand">
                 <a href="../index.html" aria-label="Go to WorkHQ Demo Hub">
-                    <img src="../assets/logo.png" class="brand-logo">
+                    <img src="../assets/logo.png" class="brand-logo" data-theme-logo data-default-logo="../assets/logo.png">
                 </a>
                 <div>
                     <span>SS&C Blue Prism</span>
@@ -544,9 +544,8 @@
                 </div>
             </div>
 
-            <details class="card workspace-card result-card collapsible-output">
-                <summary><span class="summary-kicker">Output</span><span class="summary-title">API Output</span><span class="summary-toggle" aria-hidden="true"></span></summary>
-                <div class="output-content">
+            <div class="card workspace-card result-card">
+                <h2>Output</h2>
                 <div class="output-toolbar">
                     <div class="tabs">
                         <button id="responseTab" class="tab-button active" onclick="showTab('response')">Response</button>
@@ -560,8 +559,7 @@
                 <div id="requestPanel" class="tab-panel">
                     <pre id="requestOutput">No request sent yet.</pre>
                 </div>
-                </div>
-            </details>
+            </div>
         </div>
     </div>
 

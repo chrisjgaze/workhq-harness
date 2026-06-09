@@ -5,3 +5,9 @@ node_modules/
 config/workhq-config.json
 data/*.json
 notes/
+token.txt
+
+# Local React port/experiments are not part of the original demo project.
+workhq-react-demo/
+REACT_PORT_GUIDE.md
+react_port_modular_config_guide.md

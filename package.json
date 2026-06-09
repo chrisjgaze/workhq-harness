@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "server/proxy.js",
   "scripts": {
-    "dev": "bash run_server.sh",
+    "dev": "node server/dev.js",
     "proxy": "node server/proxy.js",
-    "web": "python3 -m http.server 8080 --directory public",
-    "test": "node --check server/proxy.js"
+    "web": "node server/static.js",
+    "test": "node --check server/proxy.js && node --check server/static.js && node --check server/dev.js"
   },
   "keywords": [],
   "author": "",

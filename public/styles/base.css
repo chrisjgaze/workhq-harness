@@ -32,10 +32,17 @@ body {
 
 .brand-logo,
 .logo {
-  width: 70px;
-  height: 70px;
+  width: var(--theme-logo-width, 70px);
+  height: var(--theme-logo-height, 70px);
   object-fit: contain;
   filter: var(--logo-glow);
+}
+
+:root[data-theme="riyad-bank"] .brand-logo,
+:root[data-theme="riyad-bank"] .logo {
+  width: var(--theme-logo-width, 280px);
+  height: var(--theme-logo-height, 84px);
+  filter: none;
 }
 
 .brand h1 {

@@ -2,8 +2,12 @@
   const storageKey = "workhq-harness-theme";
   const themes = [
     { value: "workhq-dark", label: "WorkHQ Dark" },
-    { value: "ssc-blue-prism", label: "SS&C Blue Prism" }
+    { value: "ssc-blue-prism", label: "SS&C Blue Prism" },
+    { value: "riyad-bank", label: "Riyad Bank" }
   ];
+  const themeLogos = {
+    "riyad-bank": "rb_logo.svg"
+  };
 
   function getStoredTheme() {
     try {
@@ -24,7 +28,27 @@
   function applyTheme(theme) {
     const selectedTheme = themes.some(item => item.value === theme) ? theme : themes[0].value;
     document.documentElement.dataset.theme = selectedTheme;
+    updateLogos(selectedTheme);
     setStoredTheme(selectedTheme);
+  }
+
+  function getAssetPrefix(src) {
+    const assetIndex = src.lastIndexOf("assets/");
+    return assetIndex === -1 ? "assets/" : src.slice(0, assetIndex + "assets/".length);
+  }
+
+  function updateLogos(theme) {
+    document.querySelectorAll("[data-theme-logo]").forEach(logo => {
+      const defaultLogo = logo.dataset.defaultLogo || logo.getAttribute("src");
+      logo.dataset.defaultLogo = defaultLogo;
+
+      if (themeLogos[theme]) {
+        logo.src = `${getAssetPrefix(defaultLogo)}${themeLogos[theme]}`;
+        return;
+      }
+
+      logo.src = defaultLogo;
+    });
   }
 
   function createSwitcher() {
@@ -61,8 +85,12 @@
   applyTheme(getStoredTheme());
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", createSwitcher);
+    document.addEventListener("DOMContentLoaded", () => {
+      updateLogos(getStoredTheme());
+      createSwitcher();
+    });
   } else {
+    updateLogos(getStoredTheme());
     createSwitcher();
   }
 })();
