@@ -11,7 +11,7 @@
     <style>
         .builder-grid {
             display: grid;
-            grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+            grid-template-columns: minmax(700px, 1.45fr) minmax(340px, 0.55fr);
             gap: 22px;
             transition: grid-template-columns 0.2s ease;
         }
@@ -22,6 +22,99 @@
 
         .builder-panel {
             min-width: 0;
+        }
+
+        .builder-workspace {
+            display: grid;
+            grid-template-columns: minmax(140px, 0.55fr) minmax(230px, 1fr) minmax(210px, 0.85fr);
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .builder-section {
+            min-width: 0;
+            border: 1px solid var(--row-border);
+            border-radius: 16px;
+            padding: 14px;
+            background: var(--field-soft);
+        }
+
+        .builder-section h3 {
+            margin-bottom: 7px;
+        }
+
+        .field-palette {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .palette-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            background: var(--card);
+            color: var(--text);
+            cursor: grab;
+            box-shadow: none;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .palette-item:hover {
+            border-color: var(--cyan);
+        }
+
+        .palette-icon {
+            display: grid;
+            flex: 0 0 auto;
+            width: 25px;
+            height: 25px;
+            place-items: center;
+            border-radius: 8px;
+            background: var(--accent-soft);
+            color: var(--aqua);
+            font-weight: 800;
+        }
+
+        .canvas-drop-zone {
+            min-height: 290px;
+            border: 1px dashed rgba(var(--aqua-rgb), 0.42);
+            border-radius: 14px;
+            padding: 10px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .canvas-drop-zone.drag-over {
+            border-color: var(--cyan);
+            background: var(--accent-soft);
+        }
+
+        .canvas-empty {
+            display: grid;
+            min-height: 265px;
+            place-items: center;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .inspector-empty {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .inspector-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .inspector-actions button {
+            flex: 1;
         }
 
         .builder-grid.builder-hidden .builder-panel {
@@ -136,6 +229,36 @@
             border-radius: 14px;
             padding: 12px;
             background: var(--field-soft);
+            cursor: grab;
+            transition: border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .field-item.selected {
+            border-color: var(--cyan);
+            box-shadow: 0 0 18px rgba(var(--cyan-rgb), 0.2);
+        }
+
+        .field-item.dragging {
+            opacity: 0.45;
+        }
+
+        .field-item.drag-over {
+            border-color: var(--cyan);
+            transform: translateY(3px);
+        }
+
+        .field-item-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .drag-handle {
+            color: var(--muted);
+            font-size: 18px;
+            letter-spacing: -4px;
+            user-select: none;
         }
 
         .field-item strong,
@@ -173,6 +296,47 @@
 
         .checkbox-field input {
             width: auto;
+        }
+
+        .file-drop-field {
+            display: grid;
+            place-items: center;
+            min-height: 120px;
+            margin-top: 8px;
+            border: 1px dashed rgba(var(--aqua-rgb), 0.55);
+            border-radius: 14px;
+            padding: 18px;
+            background: var(--field-soft);
+            color: var(--muted);
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .file-drop-field:hover,
+        .file-drop-field.drag-over {
+            border-color: var(--cyan);
+            background: var(--accent-soft);
+        }
+
+        .file-drop-field input {
+            display: none;
+        }
+
+        .file-drop-field strong,
+        .file-drop-field small {
+            display: block;
+        }
+
+        .file-drop-field strong {
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .file-summary {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 12px;
         }
 
         pre {
@@ -220,7 +384,7 @@
             color: var(--success);
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .builder-grid,
             .topbar {
                 grid-template-columns: 1fr;
@@ -231,6 +395,10 @@
             .builder-grid.builder-hidden .builder-toggle {
                 position: static;
                 margin-bottom: 14px;
+            }
+
+            .builder-workspace {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -263,41 +431,32 @@
                 <input id="webhookUrl" type="text" inputmode="url" spellcheck="false"
                     placeholder="https://.../webhooks/.../sync" />
 
-                <h3>Add Field</h3>
-                <label for="fieldLabel">Label</label>
-                <input id="fieldLabel" placeholder="Customer name" />
-
-                <label for="fieldKey">Payload Key</label>
-                <input id="fieldKey" placeholder="customerName" />
-
-                <label for="fieldType">Type</label>
-                <select id="fieldType" onchange="toggleOptions()">
-                    <option value="text">Text</option>
-                    <option value="email">Email</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="textarea">Long Text</option>
-                    <option value="select">Select</option>
-                    <option value="checkbox">Checkbox</option>
-                </select>
-
-                <div id="optionsGroup" hidden>
-                    <label for="fieldOptions">Options</label>
-                    <input id="fieldOptions" placeholder="Low, Medium, High" />
-                </div>
-
-                <label class="checkbox-field">
-                    <input id="fieldRequired" type="checkbox" />
-                    Required field
-                </label>
-
                 <div class="button-row">
-                    <button type="button" onclick="addField()">Add Field</button>
                     <button type="button" class="button-secondary" onclick="saveDefinition()">Save Form</button>
                     <button type="button" class="button-secondary" onclick="resetDefinition()">Reset</button>
                 </div>
 
-                <div id="fieldList" class="field-list"></div>
+                <div class="builder-workspace">
+                    <section class="builder-section">
+                        <h3>Elements</h3>
+                        <p class="hint">Drag an element onto the form canvas.</p>
+                        <div id="fieldPalette" class="field-palette"></div>
+                    </section>
+
+                    <section class="builder-section">
+                        <h3>Form Canvas</h3>
+                        <p class="hint">Drop elements here. Drag existing fields to reorder them.</p>
+                        <div id="fieldList" class="field-list canvas-drop-zone"
+                            ondragover="dragCanvasOver(event)"
+                            ondragleave="event.currentTarget.classList.remove('drag-over')"
+                            ondrop="dropOnCanvas(event)"></div>
+                    </section>
+
+                    <section class="builder-section">
+                        <h3>Field Configuration</h3>
+                        <div id="fieldInspector" class="inspector-empty">Select a field on the canvas to configure it.</div>
+                    </section>
+                </div>
             </section>
 
             <section class="card preview-card">
@@ -327,6 +486,20 @@
         const proxyProtocol = ["http:", "https:"].includes(window.location.protocol) ? window.location.protocol : "http:";
         const PROXY_BASE_URL = `${proxyProtocol}//${window.location.hostname || "localhost"}:3000`;
         let notificationTimer = null;
+        let draggedFieldId = null;
+        let draggedPaletteType = null;
+        let selectedFieldId = null;
+        const MAX_TOTAL_FILE_BYTES = 7 * 1024 * 1024;
+        const fieldTypes = [
+            { type: "text", label: "Text", icon: "T" },
+            { type: "email", label: "Email", icon: "@" },
+            { type: "number", label: "Number", icon: "#" },
+            { type: "date", label: "Date", icon: "D" },
+            { type: "textarea", label: "Long Text", icon: "P" },
+            { type: "select", label: "Select", icon: "V" },
+            { type: "checkbox", label: "Checkbox", icon: "C" },
+            { type: "file", label: "File Upload", icon: "F" }
+        ];
 
         function createId() {
             if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -380,10 +553,6 @@
             }
         }
 
-        function toggleOptions() {
-            document.getElementById("optionsGroup").hidden = document.getElementById("fieldType").value !== "select";
-        }
-
         function toggleBuilder() {
             const grid = document.getElementById("builderGrid");
             const toggle = document.getElementById("builderToggle");
@@ -422,43 +591,118 @@
             }, 120000);
         }
 
-        function addField() {
-            const labelInput = document.getElementById("fieldLabel");
-            const keyInput = document.getElementById("fieldKey");
-            const type = document.getElementById("fieldType").value;
-            const label = labelInput.value.trim();
-            const key = keyInput.value.trim() || makeKey(label);
-
-            if (!label || !key) {
-                window.alert("Enter a field label and payload key.");
-                return;
-            }
-
-            if (fields.some(field => field.key === key)) {
-                window.alert("Payload keys must be unique.");
-                return;
-            }
-
-            fields.push({
+        function createField(type) {
+            const definition = fieldTypes.find(item => item.type === type);
+            const label = definition?.label || "New Field";
+            const field = {
                 id: createId(),
                 label,
-                key,
+                key: makeUniqueKey(makeKey(label) || "field"),
                 type,
-                required: document.getElementById("fieldRequired").checked,
-                options: type === "select"
-                    ? document.getElementById("fieldOptions").value.split(",").map(value => value.trim()).filter(Boolean)
-                    : []
-            });
+                required: false,
+                multiple: false,
+                options: type === "select" ? ["Option 1", "Option 2"] : []
+            };
 
-            labelInput.value = "";
-            keyInput.value = "";
-            document.getElementById("fieldOptions").value = "";
-            document.getElementById("fieldRequired").checked = false;
+            fields.push(field);
+            selectedFieldId = field.id;
             renderPreview();
         }
 
-        function removeField(id) {
+        function makeUniqueKey(baseKey, currentId = null) {
+            let key = baseKey;
+            let suffix = 2;
+            while (fields.some(field => field.id !== currentId && field.key === key)) {
+                key = `${baseKey}${suffix++}`;
+            }
+            return key;
+        }
+
+        function removeField(event, id) {
+            event?.stopPropagation();
             fields = fields.filter(field => field.id !== id);
+            if (selectedFieldId === id) selectedFieldId = null;
+            renderPreview();
+        }
+
+        function selectField(id) {
+            selectedFieldId = id;
+            renderPreview();
+        }
+
+        function updateSelectedField() {
+            const field = fields.find(item => item.id === selectedFieldId);
+            if (!field) return;
+
+            const label = document.getElementById("inspectorLabel").value.trim() || "Untitled Field";
+            const requestedKey = document.getElementById("inspectorKey").value.trim() || makeKey(label) || "field";
+            field.label = label;
+            field.key = makeUniqueKey(requestedKey, field.id);
+            field.required = document.getElementById("inspectorRequired").checked;
+            field.options = field.type === "select"
+                ? document.getElementById("inspectorOptions").value.split(",").map(value => value.trim()).filter(Boolean)
+                : [];
+            field.multiple = field.type === "file" && document.getElementById("inspectorMultiple").checked;
+            renderPreview();
+        }
+
+        function renderPalette() {
+            document.getElementById("fieldPalette").innerHTML = fieldTypes.map(field => `
+                <button class="palette-item" type="button" draggable="true"
+                    ondragstart="startPaletteDrag(event, '${field.type}')"
+                    ondragend="endPaletteDrag()"
+                    onclick="createField('${field.type}')">
+                    <span class="palette-icon">${field.icon}</span>
+                    <span>${field.label}</span>
+                </button>
+            `).join("");
+        }
+
+        function renderInspector() {
+            const inspector = document.getElementById("fieldInspector");
+            const field = fields.find(item => item.id === selectedFieldId);
+
+            if (!field) {
+                inspector.className = "inspector-empty";
+                inspector.innerHTML = "Select a field on the canvas to configure it.";
+                return;
+            }
+
+            inspector.className = "";
+            inspector.innerHTML = `
+                <p class="hint">Type: ${escapeHtml(field.type)}</p>
+                <label for="inspectorLabel">Label</label>
+                <input id="inspectorLabel" value="${escapeHtml(field.label)}" />
+                <label for="inspectorKey">Payload Key</label>
+                <input id="inspectorKey" value="${escapeHtml(field.key)}" />
+                ${field.type === "select" ? `
+                    <label for="inspectorOptions">Options</label>
+                    <input id="inspectorOptions" value="${escapeHtml(field.options.join(", "))}" />
+                ` : ""}
+                ${field.type === "file" ? `
+                    <label class="checkbox-field">
+                        <input id="inspectorMultiple" type="checkbox" ${field.multiple ? "checked" : ""}
+                            onchange="setSelectedFieldMultiple(this.checked)" />
+                        Allow multiple files
+                    </label>
+                    <p class="hint">This setting applies immediately.</p>
+                ` : `<input id="inspectorMultiple" type="checkbox" hidden />`}
+                <label class="checkbox-field">
+                    <input id="inspectorRequired" type="checkbox" ${field.required ? "checked" : ""} />
+                    Required field
+                </label>
+                <div class="inspector-actions">
+                    <button type="button" onclick="updateSelectedField()">Apply</button>
+                    <button type="button" class="field-remove" onclick="removeField(event, '${field.id}')">Remove</button>
+                </div>
+            `;
+        }
+
+        function setSelectedFieldMultiple(multiple) {
+            const field = fields.find(item => item.id === selectedFieldId);
+            if (!field || field.type !== "file") return;
+
+            field.multiple = Boolean(multiple);
             renderPreview();
         }
 
@@ -481,6 +725,20 @@
                 return `<label class="checkbox-field"><input id="field-${field.id}" name="${escapeHtml(field.key)}" type="checkbox" ${required}>${escapeHtml(field.label)}</label>`;
             }
 
+            if (field.type === "file") {
+                return `${label}
+                    <label class="file-drop-field" id="drop-${field.id}" for="field-${field.id}">
+                        <span>
+                            <strong>Drop ${field.multiple ? "files" : "a file"} here or click to browse</strong>
+                            <small>${field.multiple ? "Multiple files allowed." : "One file allowed."} Files are included as base64.</small>
+                            <span id="summary-${field.id}" class="file-summary">No file selected.</span>
+                        </span>
+                        <input id="field-${field.id}" name="${escapeHtml(field.key)}" type="file"
+                            ${field.multiple ? "multiple" : ""} ${required}
+                            onchange="updateFileSummary('${field.id}')" />
+                    </label>`;
+            }
+
             return `${label}<input id="field-${field.id}" name="${escapeHtml(field.key)}" type="${field.type}" ${required}>`;
         }
 
@@ -489,15 +747,190 @@
             document.getElementById("previewForm").innerHTML =
                 fields.map(renderField).join("") +
                 `<button id="submitButton" type="submit">Submit to Webhook</button>`;
-            document.getElementById("fieldList").innerHTML = fields.map(field => `
-                <div class="field-item">
-                    <div>
+            document.getElementById("fieldList").innerHTML = fields.length ? fields.map(field => `
+                <div class="field-item ${field.id === selectedFieldId ? "selected" : ""}" draggable="true" data-field-id="${field.id}"
+                    onclick="selectField('${field.id}')"
+                    ondragstart="startFieldDrag(event, '${field.id}')"
+                    ondragover="dragFieldOver(event, '${field.id}')"
+                    ondragleave="event.currentTarget.classList.remove('drag-over')"
+                    ondrop="dropField(event, '${field.id}')"
+                    ondragend="endFieldDrag()">
+                    <div class="field-item-main">
+                        <span class="drag-handle" aria-hidden="true">::</span>
+                        <div>
                         <strong>${escapeHtml(field.label)}</strong>
-                        <small>${escapeHtml(field.key)} · ${escapeHtml(field.type)}${field.required ? " · required" : ""}</small>
+                        <small>${escapeHtml(field.key)} · ${escapeHtml(field.type)}${field.multiple ? " · multiple" : ""}${field.required ? " · required" : ""}</small>
+                        </div>
                     </div>
-                    <button type="button" class="field-remove" onclick="removeField('${field.id}')">Remove</button>
+                    <button type="button" class="field-remove" onclick="removeField(event, '${field.id}')">Remove</button>
                 </div>
-            `).join("");
+            `).join("") : `<div class="canvas-empty">Drag elements here to build the form.</div>`;
+            renderInspector();
+            wireFileDropZones();
+        }
+
+        function startPaletteDrag(event, type) {
+            draggedPaletteType = type;
+            draggedFieldId = null;
+            event.dataTransfer.setData("text/plain", `palette:${type}`);
+            event.dataTransfer.effectAllowed = "copy";
+        }
+
+        function endPaletteDrag() {
+            draggedPaletteType = null;
+            document.getElementById("fieldList").classList.remove("drag-over");
+        }
+
+        function dragCanvasOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add("drag-over");
+            event.dataTransfer.dropEffect = draggedPaletteType ? "copy" : "move";
+        }
+
+        function dropOnCanvas(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove("drag-over");
+
+            if (draggedPaletteType) {
+                const type = draggedPaletteType;
+                draggedPaletteType = null;
+                createField(type);
+                return;
+            }
+
+            if (draggedFieldId) {
+                const sourceIndex = fields.findIndex(field => field.id === draggedFieldId);
+                const [movedField] = fields.splice(sourceIndex, 1);
+                fields.push(movedField);
+                draggedFieldId = null;
+                renderPreview();
+            }
+        }
+
+        function startFieldDrag(event, id) {
+            draggedFieldId = id;
+            draggedPaletteType = null;
+            event.currentTarget.classList.add("dragging");
+            event.dataTransfer.setData("text/plain", `field:${id}`);
+            event.dataTransfer.effectAllowed = "move";
+        }
+
+        function dragFieldOver(event, id) {
+            if (!draggedFieldId || draggedFieldId === id) return;
+            event.preventDefault();
+            event.currentTarget.classList.add("drag-over");
+            event.dataTransfer.dropEffect = "move";
+        }
+
+        function dropField(event, targetId) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (draggedPaletteType) {
+                const type = draggedPaletteType;
+                const targetIndex = fields.findIndex(field => field.id === targetId);
+                const definition = fieldTypes.find(item => item.type === type);
+                const label = definition?.label || "New Field";
+                const field = {
+                    id: createId(),
+                    label,
+                    key: makeUniqueKey(makeKey(label) || "field"),
+                    type,
+                    required: false,
+                    multiple: false,
+                    options: type === "select" ? ["Option 1", "Option 2"] : []
+                };
+                fields.splice(targetIndex, 0, field);
+                selectedFieldId = field.id;
+                draggedPaletteType = null;
+                renderPreview();
+                return;
+            }
+
+            if (!draggedFieldId || draggedFieldId === targetId) return;
+
+            const sourceIndex = fields.findIndex(field => field.id === draggedFieldId);
+            const targetIndex = fields.findIndex(field => field.id === targetId);
+            const [movedField] = fields.splice(sourceIndex, 1);
+            fields.splice(targetIndex, 0, movedField);
+            draggedFieldId = null;
+            renderPreview();
+        }
+
+        function endFieldDrag() {
+            draggedFieldId = null;
+            document.querySelectorAll(".field-item").forEach(item => {
+                item.classList.remove("dragging", "drag-over");
+            });
+        }
+
+        function wireFileDropZones() {
+            fields.filter(field => field.type === "file").forEach(field => {
+                const dropZone = document.getElementById(`drop-${field.id}`);
+                const input = document.getElementById(`field-${field.id}`);
+                if (!dropZone || !input) return;
+
+                ["dragenter", "dragover"].forEach(eventName => {
+                    dropZone.addEventListener(eventName, event => {
+                        event.preventDefault();
+                        dropZone.classList.add("drag-over");
+                    });
+                });
+                ["dragleave", "drop"].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.remove("drag-over"));
+                });
+                dropZone.addEventListener("drop", event => {
+                    event.preventDefault();
+                    const droppedFiles = [...event.dataTransfer.files];
+
+                    if (!field.multiple && droppedFiles.length > 1) {
+                        window.alert("This field accepts one file. Drop a single file or enable multiple files in the builder.");
+                        return;
+                    }
+
+                    try {
+                        const transfer = new DataTransfer();
+                        const existingFiles = field.multiple ? [...input.files] : [];
+                        const combinedFiles = [...existingFiles, ...droppedFiles];
+                        const acceptedFiles = field.multiple
+                            ? combinedFiles.filter((file, index, files) =>
+                                files.findIndex(candidate =>
+                                    candidate.name === file.name &&
+                                    candidate.size === file.size &&
+                                    candidate.lastModified === file.lastModified
+                                ) === index
+                            )
+                            : droppedFiles.slice(0, 1);
+                        acceptedFiles.forEach(file => transfer.items.add(file));
+                        input.files = transfer.files;
+
+                        if (input.files.length !== acceptedFiles.length) {
+                            window.alert(`The browser accepted ${input.files.length} of ${acceptedFiles.length} files. Click the upload area and select the files together instead.`);
+                        }
+                    } catch {
+                        window.alert("This browser cannot attach dropped files. Click the upload area to select them instead.");
+                        return;
+                    }
+
+                    updateFileSummary(field.id);
+                });
+            });
+        }
+
+        function updateFileSummary(fieldId) {
+            const input = document.getElementById(`field-${fieldId}`);
+            const summary = document.getElementById(`summary-${fieldId}`);
+            const files = [...input.files];
+            summary.textContent = files.length
+                ? `${files.length} file${files.length === 1 ? "" : "s"} selected (${formatBytes(files.reduce((total, file) => total + file.size, 0))})`
+                : "No file selected.";
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes) return "0 B";
+            const units = ["B", "KB", "MB", "GB"];
+            const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+            return `${(bytes / (1024 ** index)).toFixed(index ? 1 : 0)} ${units[index]}`;
         }
 
         function saveDefinition() {
@@ -513,9 +946,55 @@
             if (!window.confirm("Reset the form builder?")) return;
             localStorage.removeItem(STORAGE_KEY);
             fields = defaultFields.map(field => ({ ...field, id: createId() }));
+            selectedFieldId = null;
             document.getElementById("formName").value = "Customer Request";
             document.getElementById("webhookUrl").value = "";
             renderPreview();
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(",", 2)[1] || "");
+                reader.onerror = () => reject(reader.error || new Error(`Unable to read ${file.name}`));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function getFieldValue(field, input) {
+            if (field.type === "checkbox") {
+                return input.checked;
+            }
+
+            if (field.type === "number") {
+                return input.value === "" ? null : Number(input.value);
+            }
+
+            if (field.type === "file") {
+                const files = [...input.files];
+                const encodedFiles = await Promise.all(files.map(async file => ({
+                    fileName: file.name,
+                    contentType: file.type || "application/octet-stream",
+                    size: file.size,
+                    contentBase64: await fileToBase64(file)
+                })));
+
+                return field.multiple ? encodedFiles : encodedFiles[0] || null;
+            }
+
+            return input.value;
+        }
+
+        function toLocalIsoString(date) {
+            const offsetMinutes = -date.getTimezoneOffset();
+            const sign = offsetMinutes >= 0 ? "+" : "-";
+            const pad = value => String(value).padStart(2, "0");
+            const offsetHours = pad(Math.floor(Math.abs(offsetMinutes) / 60));
+            const offsetRemainder = pad(Math.abs(offsetMinutes) % 60);
+
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+                `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}` +
+                `${sign}${offsetHours}:${offsetRemainder}`;
         }
 
         async function submitForm(event) {
@@ -542,26 +1021,56 @@
                 return;
             }
 
+            const totalFileBytes = fields
+                .filter(field => field.type === "file")
+                .flatMap(field => [...document.getElementById(`field-${field.id}`).files])
+                .reduce((total, file) => total + file.size, 0);
+
+            if (totalFileBytes > MAX_TOTAL_FILE_BYTES) {
+                output.textContent = `Selected files total ${formatBytes(totalFileBytes)}. Keep files below ${formatBytes(MAX_TOTAL_FILE_BYTES)} so the base64 JSON fits the 10 MB proxy limit.`;
+                return;
+            }
+
+            const submittedAt = new Date();
             const values = {};
-            fields.forEach(field => {
-                const input = document.getElementById(`field-${field.id}`);
-                values[field.key] = field.type === "checkbox" ? input.checked : input.value;
-            });
+            button.disabled = true;
+            output.textContent = totalFileBytes ? "Encoding files..." : "Preparing submission...";
+
+            try {
+                for (const field of fields) {
+                    const input = document.getElementById(`field-${field.id}`);
+                    values[field.key] = await getFieldValue(field, input);
+                }
+            } catch (error) {
+                output.textContent = `Unable to read selected files: ${error.message || String(error)}`;
+                button.disabled = false;
+                return;
+            }
 
             const payload = {
                 formName: document.getElementById("formName").value.trim() || "Untitled Form",
-                submittedAt: new Date().toISOString(),
+                submittedAtUtc: submittedAt.toISOString(),
+                submittedAtLocal: toLocalIsoString(submittedAt),
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
                 values
             };
+            let requestBody;
 
-            button.disabled = true;
+            try {
+                requestBody = JSON.stringify({ endpoint: webhookUrl.href, body: payload });
+                JSON.parse(requestBody);
+            } catch (error) {
+                output.textContent = `The form could not be converted to valid JSON: ${error.message || String(error)}`;
+                return;
+            }
+
             output.textContent = "Submitting...";
 
             try {
                 const response = await fetch(`${PROXY_BASE_URL}/form-webhook`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ endpoint: webhookUrl.href, body: payload })
+                    body: requestBody
                 });
                 const responseText = await response.text();
                 let data = responseText;
@@ -584,6 +1093,7 @@
             }
         }
 
+        renderPalette();
         renderPreview();
     </script>
 </body>

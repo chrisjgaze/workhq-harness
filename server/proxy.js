@@ -444,6 +444,17 @@ app.post("/form-webhook", async (req, res) => {
       });
     }
 
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ ok: false, error: "body must be a JSON object" });
+    }
+
+    let requestBody;
+    try {
+      requestBody = JSON.stringify(body);
+    } catch {
+      return res.status(400).json({ ok: false, error: "body must be valid JSON" });
+    }
+
     const tokenData = await getWorkHQToken();
     const upstreamRes = await fetch(url, {
       method: "POST",
@@ -451,7 +462,7 @@ app.post("/form-webhook", async (req, res) => {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${tokenData.access_token}`
       },
-      body: JSON.stringify(body || {})
+      body: requestBody
     });
     const responseText = await upstreamRes.text();
     let responseBody = responseText;

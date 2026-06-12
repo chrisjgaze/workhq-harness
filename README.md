@@ -119,6 +119,67 @@ Open:
 
 Stop both services with `Ctrl+C`.
 
+## Form Builder
+
+Open **Form Builder** from the demo hub to create and submit custom forms without editing HTML.
+
+The builder contains three areas:
+
+- **Elements** - drag a field type onto the form canvas.
+- **Form Canvas** - select and reorder fields using drag and drop.
+- **Field Configuration** - configure the selected field's label, payload key, required status, select options, and file-upload behavior.
+
+Supported field types:
+
+- Text
+- Email
+- Number
+- Date
+- Long text
+- Select
+- Checkbox
+- Single or multiple file upload
+
+Form definitions can be saved in browser local storage. They are local to the current browser and are not committed to Git.
+
+### Webhook Submission
+
+Enter a complete HTTPS WorkHQ webhook URL in the builder. When the form is submitted:
+
+1. The browser creates a valid JSON payload.
+2. Files are converted to base64 with their file name, content type, and size.
+3. The payload is sent to the local `/form-webhook` proxy endpoint.
+4. The proxy obtains a WorkHQ bearer token and forwards the payload.
+5. A success notification appears when the webhook returns a successful response.
+
+The proxy only accepts webhook URLs on the configured WorkHQ tenant domain.
+
+Example payload:
+
+```json
+{
+  "formName": "Customer Request",
+  "submittedAtUtc": "2026-06-12T06:58:01.787Z",
+  "submittedAtLocal": "2026-06-12T10:58:01+04:00",
+  "timeZone": "Asia/Dubai",
+  "values": {
+    "customerName": "Example Customer",
+    "amount": 1250.5,
+    "approved": true,
+    "documents": [
+      {
+        "fileName": "request.pdf",
+        "contentType": "application/pdf",
+        "size": 28450,
+        "contentBase64": "JVBERi0xLjQ..."
+      }
+    ]
+  }
+}
+```
+
+File uploads are limited to approximately 7 MB of original files per submission. Base64 increases the payload size, and the local Express proxy accepts JSON bodies up to 10 MB.
+
 ## Run Services Separately
 
 Start only the Express proxy:
@@ -211,8 +272,23 @@ Confirm that `config/workhq-config.json` exists and contains the correct tenant 
 
 Confirm that the AWS environment variables are set in the same terminal that runs `npm run dev`, and that the AWS identity can write to the configured bucket.
 
+### Form webhook returns `Cannot POST /form-webhook`
+
+An older proxy process is still running. Stop the current services with `Ctrl+C`, then restart them with `npm run dev` or `run_demo.bat`.
+
+### Form webhook is rejected
+
+Confirm that the URL is HTTPS, contains `/webhooks/`, and uses the same tenant domain configured in `config/workhq-config.json`.
+
+### Form file upload is too large
+
+Reduce the selected files to below 7 MB total. Files are base64 encoded, which increases the final JSON request size.
+
 ## Security
 
 - Keep `config/workhq-config.json`, `.env`, tokens, and runtime data out of Git.
+- Form definitions are stored in browser local storage and may contain webhook URLs.
+- Form webhook bearer tokens are obtained and used by the Express backend, not exposed to the Form Builder page.
+- `/form-webhook` only forwards requests to HTTPS webhook URLs on the configured WorkHQ tenant domain.
 - Use this project as a local demonstration tool, not as a production authentication service.
 - Restrict service-account and AWS permissions to the minimum required for the demonstrations.
